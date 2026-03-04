@@ -1,0 +1,116 @@
+/* =========================
+   CLASSIC FOUNDER SECTION
+   ========================= */
+
+.founder-section-classic {
+  padding: 100px 0;
+  background: var(--bg-main);
+  /* Uses Theme Cream/Black */
+  overflow: hidden;
+}
+
+/* Image Frame */
+.founder-frame {
+  position: relative;
+  padding: 15px;
+  z-index: 1;
+}
+
+.founder-img-classic {
+  width: 100%;
+  max-width: 450px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  z-index: 2;
+  filter: grayscale(100%);
+  /* Start classic B&W */
+  transition: filter 0.5s ease;
+}
+
+.founder-img-classic:hover {
+  filter: grayscale(0%);
+  /* Color on hover */
+}
+
+.frame-border-gold {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 100%;
+  height: 100%;
+  max-width: 450px;
+  border: 2px solid var(--gold-primary);
+  z-index: 0;
+  transition: transform 0.5s ease;
+}
+
+.founder-frame:hover .frame-border-gold {
+  transform: translate(10px, 10px);
+}
+
+/* Text Content */
+.founder-message p {
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+/* Signature Area */
+.founder-signature h4 {
+  color: var(--text-primary);
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .founder-section-classic {
+    background: #050505;
+    /* Deep Black */
+  }
+
+  .founder-img-classic {
+    filter: grayscale(30%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  }
+
+  .founder-message .text-secondary {
+    color: #ccc !important;
+  }
+
+  .founder-message .text-muted {
+    color: #888 !important;
+  }
+}
+
+/* Tablet/Mobile */
+@media (max-width: 992px) {
+  .founder-frame {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+  }
+
+  .frame-border-gold {
+    left: 50%;
+    transform: translateX(-50%);
+    margin-left: 15px;
+    margin-top: 15px;
+  }
+
+  .founder-text-content {
+    padding-left: 0 !important;
+    text-align: center;
+  }
+
+  .founder-signature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
