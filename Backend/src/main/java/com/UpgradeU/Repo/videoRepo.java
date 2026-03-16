@@ -1,21 +1,24 @@
 package com.UpgradeU.Repo;
 
+
+
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.UpgradeU.Entity.Course;
-import com.UpgradeU.Entity.videoEntity;
+import com.UpgradeU.Entity.VideoEntity;
 
-public interface videoRepo extends JpaRepository<videoEntity, Integer>{
 
-	@Query("select v from videoEntity v where v.course=:c ")
-	 List<videoEntity> findByCourse(Course c);
+public interface VideoRepo extends JpaRepository<VideoEntity, Integer>{
+
+	@Query("select v from VideoEntity v where v.course=:c ")
+	 List<VideoEntity> findByCourse(Course c);
 	 
-	 @Query("select v from videoEntity v where v.course.id=:id")
-	List<videoEntity> getList(int id);
+	 @Query("select v from VideoEntity v where v.course.id=:id")
+	List<VideoEntity> getList(int id);
 
-	List<videoEntity> findByCourseId(Long courseId);
+	List<VideoEntity> findByCourseId(Long courseId);
 
 }

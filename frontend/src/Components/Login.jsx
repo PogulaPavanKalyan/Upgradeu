@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "./Authprovider";
@@ -12,6 +12,13 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add("no-padding");
+    return () => {
+      document.body.classList.remove("no-padding");
+    };
+  }, []);
 
   const handlesubmit = async (e) => {
     e.preventDefault();
@@ -68,7 +75,7 @@ function Login() {
         <div className="login-float-item">🧠</div>
       </div>
 
-      {/* Split container */}
+      {/* Centered Auth container */}
       <div className="login-split-container">
 
         {/* LEFT — Brand & 3D Showcase (desktop/tablet) */}
@@ -93,11 +100,11 @@ function Login() {
           </div>
         </div>
 
-        {/* RIGHT — Login Form */}
+        {/* Login Form */}
         <div className="login-form-side">
           <div className="login-form-container">
 
-            {/* Mobile logo (visible < 768px) */}
+            {/* Logo */}
             <div className="login-mobile-logo" onClick={() => navigate("/")}>
               <span className="login-mobile-logo-text">
                 Upgrade<span>U</span>

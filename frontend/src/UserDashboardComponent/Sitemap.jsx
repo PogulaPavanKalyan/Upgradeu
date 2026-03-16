@@ -2,7 +2,6 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Map, Book, Settings, Info, Briefcase, HelpCircle, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "./NavBar";
 
 const Sitemap = () => {
     const navigate = useNavigate();
@@ -56,7 +55,6 @@ const Sitemap = () => {
 
     return (
         <>
-            <NavBar />
             <div className="container py-5">
                 <div className="text-center mb-5">
                     <h1 className="fw-bold display-4 text-dark mb-3">Sitemap</h1>

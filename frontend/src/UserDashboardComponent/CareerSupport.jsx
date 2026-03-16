@@ -23,7 +23,6 @@ import {
     Terminal
 } from "lucide-react";
 import "../Styles/CareerSupport.css";
-import NavBar from "./NavBar";
 import { useNavigate } from "react-router-dom";
 import atsResume from "../assets/images/ats_resume.png";
 
@@ -727,7 +726,6 @@ const CareerSupport = () => {
 
     return (
         <>
-            <NavBar />
             <div className="career-page">
                 {/* HERO SECTION */}
                 <section className="career-hero">

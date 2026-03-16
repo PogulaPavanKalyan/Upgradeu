@@ -14,9 +14,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
-public class videoEntity {
+public class VideoEntity {
 	
-	public videoEntity() {
+	public VideoEntity() {
 		
 	}
 	
@@ -35,7 +35,7 @@ public class videoEntity {
 	@JoinColumn(name = "section_id")
 	private Sections section;
 
-	public videoEntity(int id, String videoPath, String videoType, Integer serialNumber, String description,
+	public VideoEntity(int id, String videoPath, String videoType, Integer serialNumber, String description,
 			String title, Course course, Sections section) {
 		super();
 		this.id = id;

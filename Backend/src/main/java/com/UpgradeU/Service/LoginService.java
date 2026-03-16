@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,12 @@ public class LoginService {
 	@Autowired
 	private AuthenticationManager authManager;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	public void addData(Users user, Role role) {
 		user.setRole(role);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		repo.save(user);
 
 	}

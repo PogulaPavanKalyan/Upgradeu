@@ -20,27 +20,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.UpgradeU.Dto.ExamCreateRequest;
 import com.UpgradeU.Entity.BlogsEntity;
 import com.UpgradeU.Entity.Course;
 import com.UpgradeU.Entity.CrouselDataEntity;
-
+import com.UpgradeU.Entity.Exam;
 import com.UpgradeU.Entity.PaymentEntity;
 import com.UpgradeU.Entity.Sections;
-import com.UpgradeU.Entity.videoEntity;
+import com.UpgradeU.Entity.VideoEntity;
 import com.UpgradeU.Repo.CourseImageRepo;
 import com.UpgradeU.Repo.CourseRepo;
 
 import com.UpgradeU.Repo.PaymentRepo;
 import com.UpgradeU.Repo.UserRepo;
-import com.UpgradeU.Repo.videoRepo;
+import com.UpgradeU.Repo.VideoRepo;
 import com.UpgradeU.Service.BackgroundImageService;
 import com.UpgradeU.Service.BlogsService;
 import com.UpgradeU.Service.CourseImageService;
 import com.UpgradeU.Service.CrouselService;
-
+import com.UpgradeU.Service.ExamService;
 import com.UpgradeU.Service.SectionsService;
+import com.UpgradeU.Service.VideoService;
 import com.UpgradeU.Service.courseService;
-import com.UpgradeU.Service.videoService;
+
 
 @CrossOrigin(origins = "*")
 
@@ -54,10 +56,10 @@ public class AdminController {
 	private courseService courseservice;
 
 	@Autowired
-	private videoRepo ve;
+	private VideoRepo ve;
 
 	@Autowired
-	private videoService vs;
+	private VideoService vs;
 
 	@Autowired
 	private CourseImageRepo re;
@@ -85,6 +87,9 @@ public class AdminController {
 
 	@Autowired
 	private SectionsService ss;
+	
+	@Autowired
+	private ExamService es;
 
 	@PostMapping("/addcourse")
 	public String add(@RequestBody Course course) {
@@ -107,7 +112,7 @@ public class AdminController {
 	{
 
 		Optional<Course> course = cr.findById(id);
-		List<videoEntity> videoentity = ve.findByCourseId(id);
+		List<VideoEntity> videoentity = ve.findByCourseId(id);
 		for (var c : videoentity) {
 			ve.deleteById(c.getId());
 		}
@@ -207,5 +212,26 @@ public class AdminController {
 		List<PaymentEntity> mylearning = pr.findAll();
 		return ResponseEntity.status(HttpStatus.OK).body(mylearning);
 	}
+	
+
+	@PostMapping("/course/{courseId}/video/{videoId}")
+	public ResponseEntity<Exam> createExam(
+	        @PathVariable("courseId") Long courseId,
+	        @PathVariable("videoId") int videoId,
+	        @RequestBody ExamCreateRequest request) {
+
+	    return ResponseEntity.ok(
+	            es.createExam(courseId, videoId, request));
+	}
+	
+	@DeleteMapping("/exam/{examId}")
+	public ResponseEntity<String> deleteExam(
+			@PathVariable("examId") Long examId) {
+
+		es.deleteExam(examId);
+
+		return ResponseEntity.ok("Exam deleted successfully");
+	}
+	
 
 }

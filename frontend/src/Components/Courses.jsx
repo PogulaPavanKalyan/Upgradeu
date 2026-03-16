@@ -3,7 +3,6 @@ import { useAuth } from "./Authprovider";
 import "../Styles/Courses.css";
 import { useNavigate, useParams } from "react-router-dom";
 import BaseUrl from "./BaseUrl";
-import NavBar from "../UserDashboardComponent/NavBar";
 
 const Courses = () => {
   const { token } = useAuth();
@@ -12,24 +11,40 @@ const Courses = () => {
   const nav = useNavigate();
   const { keyword } = useParams();
 
-  /* ================= FETCH COURSES ================= */
-  useEffect(() => {
-    if (!token) return;
+  /* ================= FETCH COURSES & ENROLLMENT ================= */
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set());
 
+  useEffect(() => {
     let url = "Course";
     if (keyword) url = `search/${keyword}`;
 
-    BaseUrl.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        setCourses(res.data);
-        loadImages(res.data); // ✅ load images after courses
-      })
-      .catch((err) => {
+    const fetchData = async () => {
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        
+        // Fetch All Courses
+        const coursesRes = await BaseUrl.get(url, { headers });
+        const allCourses = coursesRes.data;
+        setCourses(allCourses);
+        loadImages(allCourses);
+
+        // Fetch Enrolled Courses if logged in
+        if (token) {
+          try {
+            const enrolledRes = await BaseUrl.get("mypaymentuser");
+            const ids = new Set(enrolledRes.data.map(item => item.course.id));
+            setEnrolledCourseIds(ids);
+          } catch (err) {
+            console.error("Error fetching enrolled courses:", err);
+          }
+        }
+      } catch (err) {
         console.error("Error fetching courses:", err);
         setCourses([]);
-      });
+      }
+    };
+
+    fetchData();
   }, [token, keyword]);
 
   /* ================= FETCH COURSE IMAGE ================= */
@@ -39,8 +54,13 @@ const Courses = () => {
     await Promise.all(
       courseList.map(async (course) => {
         try {
+          const headers = {};
+          if (token) {
+            headers.Authorization = `Bearer ${token}`;
+          }
+
           const res = await BaseUrl.get(`/getimage/${course.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers,
             responseType: "blob",
           });
 
@@ -63,57 +83,65 @@ const Courses = () => {
 
   return (
     <>
-      <NavBar />
-
       <div className="courses-page">
         <div className="course-list">
 
           {courses.length === 0 ? (
-            <p>No courses found</p>
+            <p className="no-courses">No courses found</p>
           ) : (
             courses.map((course) => (
               <div
-                className="course-card"
+                className="cc-card"
                 key={course.id}
-                onClick={() => nav(`/SingleCourseDetails/${course.id}`)}
+                onClick={() => {
+                  if (token && enrolledCourseIds.has(course.id)) {
+                    nav(`/SingleCourse/${course.id}`);
+                  } else {
+                    nav(`/SingleCourseDetails/${course.id}`);
+                  }
+                }}
               >
-                {/* ================= THUMBNAIL ================= */}
-                <div className="course-thumb-wrap">
+                {/* ── Thumbnail ── */}
+                <div className="cc-thumb">
                   <img
                     src={images[course.id] || "/course-placeholder.png"}
                     alt={course.title}
+                    className="cc-thumb-img"
                   />
+                  {/* Dark gradient overlay with category label */}
+                  <div className="cc-thumb-overlay">
+                    <span className="cc-category-overlay">{course.category || "Course"}</span>
+                  </div>
+                  {/* Level badge top-right */}
+                  <span className="cc-level-badge">All Levels</span>
                 </div>
 
-                {/* ================= INFO ================= */}
-                <div className="course-info-small">
-                  <h3 className="course-title">{course.title}</h3>
+                {/* ── Card Body ── */}
+                <div className="cc-body">
+                  {/* Category tag */}
+                  <span className="cc-category-tag">{course.category || "General"}</span>
 
-                  <p className="course-category">{course.category}</p>
+                  {/* Title */}
+                  <h3 className="cc-title">{course.title}</h3>
 
-                  <div className="course-meta">
-                    <span className="course-rating">
-                      ⭐ {course.rating || "4.5"}
-                    </span>
-                    <span className="course-duration">
-                      ⏱ {course.course_duration}
-                    </span>
+                  {/* Instructor line */}
+                  <p className="cc-instructor">UpgradeU Instructor</p>
+
+                  {/* Meta row: rating · duration */}
+                  <div className="cc-meta">
+                    <span className="cc-star">★</span>
+                    <span className="cc-rating">{course.rating || "4.5"}</span>
+                    <span className="cc-dot">·</span>
+                    <span className="cc-duration">⏱ {course.course_duration || "—"}</span>
                   </div>
 
-                  <div className="course-footer">
-                    <p className="course-price">
-                      <span>Price:</span> ₹{course.price}
-                    </p>
+                  {/* Divider */}
+                  <div className="cc-divider" />
 
-                    <button
-                      className="enroll-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        nav(`/payment/${course.id}`);
-                      }}
-                    >
-                      Enroll Now
-                    </button>
+                  {/* Footer: lessons + price */}
+                  <div className="cc-footer">
+                    <span className="cc-lessons">📘 {course.lesson_count || "—"} lessons</span>
+                    <span className="cc-price">₹{course.price}</span>
                   </div>
                 </div>
               </div>

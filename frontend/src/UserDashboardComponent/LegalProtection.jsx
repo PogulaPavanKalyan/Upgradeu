@@ -1,12 +1,10 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ShieldCheck, Lock, Eye, FileText, Globe } from "lucide-react";
-import NavBar from "./NavBar";
 
 const LegalProtection = () => {
     return (
         <>
-            <NavBar />
             <div className="container py-5">
                 <div className="row justify-content-center">
                     <div className="col-lg-10 col-xl-8">

@@ -21,7 +21,7 @@
 .career-page {
     font-family: 'Inter', system-ui, sans-serif;
     color: var(--text-dark);
-    margin-top: 80px;
+    margin-top: 0;
 }
 
 .container {

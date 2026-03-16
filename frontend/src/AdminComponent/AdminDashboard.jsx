@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import { useAuth } from "../Components/Authprovider";
 import BaseUrl from "../Components/BaseUrl";
 import {
@@ -7,30 +7,17 @@ import {
   BookOpen,
   IndianRupee,
   CreditCard,
-  LogOut,
-  LayoutDashboard,
   PlusSquare,
   FileText,
-  Image as ImageIcon,
-  Trash2,
-  Moon,
-  Sun,
-  Bell,
-  Search,
-  ChevronRight,
-  ClipboardList,
   ShieldCheck,
-  Menu,
-  X
+  ClipboardList,
 } from "lucide-react";
-import "../AdminStyles/AdminDashboard.css";
-import { link } from "framer-motion/client";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token, role = "ADMIN" } = useAuth(); // role: ADMIN | INSTRUCTOR
-  const [dark, setDark] = useState(true);
+
   const [statsData, setStatsData] = useState({
     userCount: 0,
     courseCount: 0,
@@ -40,7 +27,6 @@ const AdminDashboard = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentPayments, setRecentPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   React.useEffect(() => {
     const fetchDashboardData = async () => {
@@ -84,18 +70,41 @@ const AdminDashboard = () => {
     }
   }, [token]);
 
-  const menuItems = [
-    { name: "Dashboard", path: "/admindashboard", icon: <LayoutDashboard size={20} />, roles: ["ADMIN", "INSTRUCTOR"] },
-    { name: "Courses", path: "/AllCourses", icon: <BookOpen size={20} />, roles: ["ADMIN"] },
-    { name: "Add Course", path: "/addCourse", icon: <PlusSquare size={20} />, roles: ["ADMIN"] },
-    { name: "Users", path: "/registeruser", icon: <Users size={20} />, roles: ["ADMIN"] },
-    { name: "Blogs", path: "/PostBlogs", icon: <FileText size={20} />, roles: ["ADMIN"] },
-    { name: "Payments", path: "/PaymentDetails", icon: <CreditCard size={20} />, roles: ["ADMIN"] },
+  const handleDownloadReport = () => {
+    // Prepare CSV Headers
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Category,Metric,Value\n";
+    
+    // Add Stats Data
+    csvContent += `Overview,Total Users,${statsData.userCount}\n`;
+    csvContent += `Overview,Active Courses,${statsData.courseCount}\n`;
+    csvContent += `Overview,Total Revenue,₹${statsData.revenue}\n`;
+    csvContent += `Overview,Total Transactions,${statsData.totalTransactions}\n\n`;
 
-    { name: "Carousel Post", path: "/crouselposting", icon: <ImageIcon size={20} />, roles: ["ADMIN"] },
-    { name: "Carousel Delete", path: "/crouseldeleting", icon: <Trash2 size={20} />, roles: ["ADMIN"] },
-    { name: "Register Admin", path: "/registeradmin", icon: <ShieldCheck size={20} />, roles: ["ADMIN"] },
-  ];
+    // Add Recent Users
+    csvContent += "Recent Activities - Users,User Name,Details\n";
+    recentUsers.forEach(user => {
+      csvContent += `New User,${user.name.replace(/,/g, "")},Joined the platform\n`;
+    });
+    csvContent += "\n";
+
+    // Add Recent Payments
+    csvContent += "Recent Activities - Payments,Amount,Details\n";
+    recentPayments.forEach(pay => {
+      const amount = pay.amount || pay.totalAmount || pay.course?.price || 0;
+      const username = pay.user?.username || 'Student';
+      csvContent += `Payment,₹${amount},From ${username.replace(/,/g, "")}\n`;
+    });
+
+    // Trigger Download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Admin_Dashboard_Report_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const stats = [
     { title: "Total Users", value: statsData.userCount.toLocaleString(), icon: <Users size={24} />, color: "blue", trend: "+12%", link: "/registeruser" },
@@ -104,191 +113,116 @@ const AdminDashboard = () => {
     { title: "Transactions", value: statsData.totalTransactions.toLocaleString(), icon: <CreditCard size={24} />, color: "orange", trend: "-2%", link: "/PaymentDetails" },
   ];
 
+  const { dark } = useOutletContext() || { dark: true };
+
   return (
-    <div className={`admin-app ${dark ? "dark-theme" : "light-theme"}`}>
-      {/* CRYSTAL BACKGROUND DECORATIONS */}
-      <div className="bg-glow drift-indigo"></div>
-      <div className="bg-glow drift-cyan"></div>
-
-      {/* SIDEBAR */}
-      <aside className={`admin-sidebar ${isSidebarOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="admin-logo">
-            <div className="logo-icon">U</div>
-            <span onClick={() => { navigate("/adminDashboard"); setIsSidebarOpen(false); }}>UpgradeU Admin</span>
-          </div>
-          <button className="mobile-close-btn" onClick={() => setIsSidebarOpen(false)}>
-            <X size={24} />
-          </button>
+    <div className="dashboard-grid-wrapper" style={{ padding: "45px" }}>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Dashboard Overview</h1>
+          <p className="page-subtitle">Welcome back! Here's what's happening today.</p>
         </div>
+        <button className="primary-btn" onClick={handleDownloadReport}>Download Report</button>
+      </div>
 
-        <nav className="sidebar-nav">
-          <div className="nav-label">Main Menu</div>
-          {menuItems.filter(item => item.roles.includes(role)).map((item) => (
-            <button
-              key={item.path}
-              className={`nav-item ${location.pathname === item.path ? "active" : ""}`}
-              onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-text">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/register");
-          }}>
-            <LogOut size={20} />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* OVERLAY FOR MOBILE SIDEBAR */}
-      {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>
-      )}
-
-      {/* MAIN CONTENT AREA */}
-      <div className="content-wrapper">
-        {/* TOP NAVBAR */}
-        <header className="admin-header">
-          <button className="mobile-menu-btn" onClick={() => setIsSidebarOpen(true)}>
-            <Menu size={24} />
-          </button>
-
-          <div className="header-search">
-            <Search size={18} />
-            <input type="text" placeholder="Search analytics..." />
-          </div>
-
-          <div className="header-actions">
-            <button className="icon-btn" onClick={() => setDark(!dark)}>
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button className="icon-btn">
-              <Bell size={20} />
-              <span className="badge"></span>
-            </button>
-            <div className="user-profile">
-              <div className="user-avatar">AD</div>
-              <div className="user-info">
-                <span className="user-name">Admin User</span>
-                <span className="user-role">{role}</span>
+      {/* STATS GRID */}
+      <div className="stats-grid">
+        {stats.map((stat, idx) => (
+          <div
+            key={idx}
+            className={`stat-card ${stat.color}`}
+            onClick={stat.link ? () => navigate(stat.link) : undefined}
+            style={{ cursor: stat.link ? "pointer" : "default" }}
+          >
+            <div className="stat-icon-box">
+              {stat.icon}
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">{stat.title}</span>
+              <div className="stat-value-group">
+                <h2 className="stat-value">{stat.value}</h2>
+                <span className={`stat-trend ${stat.trend.startsWith('+') ? 'up' : 'down'}`}>
+                  {stat.trend}
+                </span>
               </div>
             </div>
           </div>
-        </header>
+        ))}
+      </div>
 
-        {/* PAGE CONTENT */}
-        <main className="admin-main">
-          <div className="page-header">
-            <div>
-              <h1 className="page-title">Dashboard Overview</h1>
-              <p className="page-subtitle">Welcome back! Here's what's happening today.</p>
-            </div>
-            <button className="primary-btn">Download Report</button>
+      {/* TWO COLUMN SECTION (Placeholder for future expansion) */}
+      <div className="dashboard-grid">
+        <div className="data-card large">
+          <div className="card-header">
+            <h3>Recent Activities</h3>
+            <button className="text-btn">View All</button>
           </div>
-
-          {/* STATS GRID */}
-          <div className="stats-grid">
-            {stats.map((stat, idx) => (
-              <div
-                key={idx}
-                className={`stat-card ${stat.color}`}
-                onClick={stat.link ? () => navigate(stat.link) : undefined}
-                style={{ cursor: stat.link ? "pointer" : "default" }}
-              >
-                <div className="stat-icon-box">
-                  {stat.icon}
+          <div className="placeholder-content">
+            {recentUsers.length === 0 && (
+              <div className="activity-item">
+                <div className="activity-dot"></div>
+                <div className="activity-text">
+                  <span>No recent activities found</span>
                 </div>
-                <div className="stat-details">
-                  <span className="stat-label">{stat.title}</span>
-                  <div className="stat-value-group">
-                    <h2 className="stat-value">{stat.value}</h2>
-                    <span className={`stat-trend ${stat.trend.startsWith('+') ? 'up' : 'down'}`}>
-                      {stat.trend}
-                    </span>
-                  </div>
+              </div>
+            )}
+
+            {recentUsers.slice(0, 3).map((user, idx) => (
+              <div className="activity-item" key={`user-${user.id}`}>
+                <div className="activity-dot"></div>
+                <div className="activity-text">
+                  <strong>New User Registered</strong>
+                  <span>{user.name} joined the platform</span>
+                  <small>Just now</small>
+                </div>
+              </div>
+            ))}
+
+            {recentPayments.slice(0, 2).map((pay, idx) => (
+              <div className="activity-item" key={`pay-${pay.id}`}>
+                <div className="activity-dot blue"></div>
+                <div className="activity-text">
+                  <strong>Payment Received</strong>
+                  <span>₹{pay.amount || pay.totalAmount || pay.course?.price || 0} from {pay.user?.username || 'Student'}</span>
+                  <small>Recent transaction</small>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* TWO COLUMN SECTION (Placeholder for future expansion) */}
-          <div className="dashboard-grid">
-            <div className="data-card large">
-              <div className="card-header">
-                <h3>Recent Activities</h3>
-                <button className="text-btn">View All</button>
-              </div>
-              <div className="placeholder-content">
-                {recentUsers.length === 0 && (
-                  <div className="activity-item">
-                    <div className="activity-dot"></div>
-                    <div className="activity-text">
-                      <span>No recent activities found</span>
-                    </div>
-                  </div>
-                )}
-
-                {recentUsers.slice(0, 3).map((user, idx) => (
-                  <div className="activity-item" key={`user-${user.id}`}>
-                    <div className="activity-dot"></div>
-                    <div className="activity-text">
-                      <strong>New User Registered</strong>
-                      <span>{user.name} joined the platform</span>
-                      <small>Just now</small>
-                    </div>
-                  </div>
-                ))}
-
-                {recentPayments.slice(0, 2).map((pay, idx) => (
-                  <div className="activity-item" key={`pay-${pay.id}`}>
-                    <div className="activity-dot blue"></div>
-                    <div className="activity-text">
-                      <strong>Payment Received</strong>
-                      <span>₹{pay.amount || pay.totalAmount || pay.course?.price || 0} from {pay.user?.username || 'Student'}</span>
-                      <small>Recent transaction</small>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="data-card small">
-              <div className="card-header">
-                <h3>Quick Actions</h3>
-              </div>
-              <div className="quick-actions">
-                <button className="action-tile" onClick={() => navigate("/addCourse")}>
-                  <PlusSquare />
-                  <span>New Course</span>
-                </button>
-
-                <button className="action-tile" onClick={() => navigate("/PostBlogs")}>
-                  <FileText />
-                  <span>Write Blog</span>
-                </button>
-                <button className="action-tile" onClick={() => navigate("/registeruser")}>
-                  <Users />
-                  <span>Manage Users</span>
-                </button>
-                <button className="action-tile" onClick={() => navigate("/PaymentDetails")}>
-                  <CreditCard />
-                  <span>Finance</span>
-                </button>
-                <button className="action-tile highlight" onClick={() => navigate("/registeradmin")}>
-                  <ShieldCheck />
-                  <span>Register Admin</span>
-                </button>
-              </div>
-            </div>
+        <div className="data-card small">
+          <div className="card-header">
+            <h3>Quick Actions</h3>
           </div>
-        </main>
+          <div className="quick-actions">
+            <button className="action-tile" onClick={() => navigate("/addCourse")}>
+              <PlusSquare />
+              <span>New Course</span>
+            </button>
+
+            <button className="action-tile" onClick={() => navigate("/PostBlogs")}>
+              <FileText />
+              <span>Write Blog</span>
+            </button>
+            <button className="action-tile" onClick={() => navigate("/AdminAddExam")}>
+              <ClipboardList size={24} />
+              <span>Add Exam</span>
+            </button>
+            <button className="action-tile" onClick={() => navigate("/PaymentDetails")}>
+              <CreditCard />
+              <span>Finance</span>
+            </button>
+            <button className="action-tile" onClick={() => navigate("/registeruser")}>
+              <Users />
+              <span>Manage Users</span>
+            </button>
+            <button className="action-tile highlight" onClick={() => navigate("/registeradmin")}>
+              <ShieldCheck />
+              <span>Register Admin</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

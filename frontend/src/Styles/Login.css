@@ -19,6 +19,10 @@
   --login-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+body.no-padding {
+  padding-top: 0 !important;
+}
+
 /* =============================================
    PAGE WRAPPER — 3D PERSPECTIVE SCENE
    ============================================= */
@@ -370,7 +374,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 50px;
+  padding: 60px 40px; /* Adjusted padding down slightly */
   background: rgba(255, 255, 255, 0.02);
   border-radius: 0 32px 32px 0;
   border: 1px solid var(--login-border);
@@ -380,7 +384,7 @@
 
 .login-form-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 480px; /* Wider to accommodate both form types properly */
 }
 
 /* =============================================
@@ -802,6 +806,115 @@
   .login-glow-orb:nth-child(3) {
     display: none;
   }
+}
+
+/* =============================================
+   REGISTRATION — PASSWORD VALIDATION & HINTS
+   ============================================= */
+
+/* Eye toggle button for show/hide password */
+.reg-eye-toggle {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.reg-eye-toggle:hover {
+  color: #94a3b8;
+}
+
+/* Password strength rules container */
+.reg-password-rules {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.reg-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.reg-rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+}
+
+@media (max-width: 500px) {
+  .reg-rules-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reg-rules-list li {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  transition: all 0.3s ease;
+}
+
+.reg-rule-icon {
+  font-size: 11px;
+  font-weight: 700;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.reg-rule-pass {
+  color: #34d399;
+}
+
+.reg-rule-pass .reg-rule-icon {
+  color: #10b981;
+}
+
+.reg-rule-fail {
+  color: #94a3b8;
+}
+
+.reg-rule-fail .reg-rule-icon {
+  color: #ef4444;
+}
+
+/* Field validation hints */
+.reg-field-hint {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 600;
+  padding-left: 2px;
+}
+
+.reg-hint-success {
+  color: #34d399;
+}
+
+.reg-hint-error {
+  color: #f87171;
 }
 
 /* =============================================

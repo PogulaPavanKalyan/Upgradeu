@@ -1,5 +1,6 @@
 package com.UpgradeU.Service;
 
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -20,20 +22,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.UpgradeU.Dto.VideoResponse;
 import com.UpgradeU.Entity.Course;
+import com.UpgradeU.Entity.VideoEntity;
 
-import com.UpgradeU.Entity.videoEntity;
 import com.UpgradeU.Repo.CourseRepo;
-import com.UpgradeU.Repo.videoRepo;
+import com.UpgradeU.Repo.VideoRepo;
+
 
 @Service
-public class videoService {
+public class VideoService {
 	@Autowired
 	private CourseRepo courseRepo;
 	
 	String dir="video/";
 	
 	@Autowired
-	private videoRepo videorepo;
+	private VideoRepo videorepo;
 	
 	public String addvideo(MultipartFile videos, Long id)throws IOException
 	{
@@ -53,7 +56,7 @@ public class videoService {
 		
 		Files.copy(videos.getInputStream(),ipath,StandardCopyOption.REPLACE_EXISTING);
 		
-		videoEntity i=new videoEntity();		
+		VideoEntity i=new VideoEntity();		
 		i.setVideoPath(ipath.toString());
 		i.setVideoType(videos.getContentType());
 		
@@ -66,7 +69,7 @@ public class videoService {
 	
 	public Resource getvideo(int id)throws MalformedURLException
 	{
-		videoEntity i=videorepo.findById(id).orElseThrow();
+		VideoEntity i=videorepo.findById(id).orElseThrow();
 		Path p=Paths.get(i.getVideoPath());
 		Resource r=new UrlResource(p.toUri());
 		return r;
@@ -74,9 +77,9 @@ public class videoService {
 
 	public List<VideoResponse> getvideoList(Long id) {
 		var c=courseRepo.findById(id).orElseThrow();
-		List<videoEntity> v=videorepo.findByCourse(c);
+		List<VideoEntity> v=videorepo.findByCourse(c);
 		List<VideoResponse> res=new ArrayList<VideoResponse>();
-		for(videoEntity i :v )
+		for(VideoEntity i :v )
 		{
 			VideoResponse r=new VideoResponse();
 			r.setCourseName(i.getCourse().getCourse_Name());
@@ -90,10 +93,10 @@ public class videoService {
 	}
 
 	public List<VideoResponse> getCourseVideoList(int id) {
-		List<videoEntity> res=videorepo.getList(id);
+		List<VideoEntity> res=videorepo.getList(id);
 		List<VideoResponse> respo=new ArrayList<VideoResponse>();
 		
-		for(videoEntity i :res )
+		for(VideoEntity i :res )
 		{
 			VideoResponse r=new VideoResponse();
 			r.setCourseName(i.getCourse().getCourse_Name());

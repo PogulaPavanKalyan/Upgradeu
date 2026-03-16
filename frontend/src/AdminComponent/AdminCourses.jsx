@@ -27,18 +27,28 @@ const AdminCourses = () => {
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeMode, setActiveMode] = useState("All");
+
+  const categories = ["All", ...new Set(courses.map(c => c.category))];
+  const modes = ["All", ...new Set(courses.map(c => c.mode))];
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
   useEffect(() => {
-    const results = courses.filter(course =>
-      course.course_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.category?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const results = courses.filter(course => {
+      const matchesSearch = course.course_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          course.category?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = activeCategory === "All" || course.category === activeCategory;
+      const matchesMode = activeMode === "All" || course.mode === activeMode;
+      
+      return matchesSearch && matchesCategory && matchesMode;
+    });
     setFilteredCourses(results);
-  }, [searchTerm, courses]);
+  }, [searchTerm, courses, activeCategory, activeMode]);
 
   const fetchCourses = async () => {
     try {
@@ -117,10 +127,52 @@ const AdminCourses = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="filter-pill-btn">
-          <Filter size={16} />
-          <span>Filters</span>
-        </button>
+        <div className="filter-container">
+          <button 
+            className={`filter-pill-btn ${(activeCategory !== "All" || activeMode !== "All") ? "active" : ""}`}
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+          >
+            <Filter size={16} />
+            <span>Filters</span>
+          </button>
+
+          {isFilterOpen && (
+            <div className="filter-dropdown">
+              <div className="filter-section">
+                <label>Category</label>
+                <div className="filter-options">
+                  {categories.map(cat => (
+                    <button 
+                      key={cat} 
+                      className={activeCategory === cat ? "active" : ""}
+                      onClick={() => setActiveCategory(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-section">
+                <label>Mode</label>
+                <div className="filter-options">
+                  {modes.map(m => (
+                    <button 
+                      key={m} 
+                      className={activeMode === m ? "active" : ""}
+                      onClick={() => setActiveMode(m)}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-footer">
+                <button className="reset-btn" onClick={() => { setActiveCategory("All"); setActiveMode("All"); setIsFilterOpen(false); }}>Reset</button>
+                <button className="apply-btn" onClick={() => setIsFilterOpen(false)}>Apply</button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* COURSES LIST */}

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './Authprovider';
 import "../Styles/SingleCourseDetails.css";
-import NavBar from '../UserDashboardComponent/NavBar';
 import BaseUrl from './BaseUrl';
 
 
@@ -18,22 +17,21 @@ const SingleCourseDetails = () => {
   const [isPurchased, setIsPurchased] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      fetchCourse();
-    }
-  }, [id, token]);
+    fetchCourse();
+  }, [id]);
 
   // Fetch single course + videos
   const fetchCourse = async () => {
     try {
       const res = await BaseUrl.get(
-        `Course/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `Course/${id}`
       );
       setCourse(res.data);
       fetchImage(id);
       fetchVideos(id);
-      checkIfPurchased(id); // Check purchase status
+      if (token) {
+        checkIfPurchased(id); // Check purchase status only if logged in
+      }
     } catch (err) {
       console.error(err);
     }
@@ -41,9 +39,7 @@ const SingleCourseDetails = () => {
 
   const fetchVideos = async (courseId) => {
     try {
-      const res = await BaseUrl.get(`courseVideoList/${courseId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await BaseUrl.get(`courseVideoList/${courseId}`);
       setVideos(res.data);
     } catch (err) {
       console.error("Failed to fetch videos", err);
@@ -52,28 +48,19 @@ const SingleCourseDetails = () => {
 
   const checkIfPurchased = async (courseId) => {
     try {
-      // Attempt to check against "mypaymentuser" (Correct endpoint provided by user)
-      const res = await BaseUrl.get("/mypaymentuser", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      // Check if any payment corresponds to this course
-      // Assuming structure: [{ course: { id: ... } }, ...]
+      const res = await BaseUrl.get("/mypaymentuser");
       const isOwned = res.data.some(payment =>
         payment.course && payment.course.id === parseInt(courseId)
       );
       setIsPurchased(isOwned);
-      if (isOwned) console.log("User owns this course.");
     } catch (err) {
       console.error("Failed to verify purchase status:", err);
-      // Helper for debugging: if 404, maybe try another endpoint?
     }
   };
 
   const fetchImage = async (courseId) => {
     try {
       const res = await BaseUrl.get(`getimage/${courseId}`, {
-        headers: { Authorization: `Bearer ${token}` },
         responseType: "blob",
       });
       setImageUrl(URL.createObjectURL(res.data));
@@ -92,12 +79,10 @@ const SingleCourseDetails = () => {
   useEffect(() => {
     const checkCart = async () => {
       try {
-        const res = await BaseUrl.get("getcart", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await BaseUrl.get("getcart");
 
         const isInCart = res.data.some(
-          (item) => item.course.id === course?.id
+          (item) => item.course && item.course.id === Number(course?.id)
         );
         setAlreadyInCart(isInCart);
       } catch (err) {
@@ -108,34 +93,40 @@ const SingleCourseDetails = () => {
     if (token && course) checkCart();
   }, [token, course]);
 
-  // Buy course → POST payment → navigate to payment page
+  // Buy course
   const buyCourse = async () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     try {
-      const res = await BaseUrl.post(
-        `payment/${id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const paymentId = res.data.id; // backend returns payment entity with ID
-      navigate(`/checkout/${paymentId}`);
+      if (!alreadyInCart) {
+        await BaseUrl.post(`addtocart/${id}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAlreadyInCart(true);
+      }
+      navigate("/checkout", { state: { directBuyCourse: course } });
     } catch (err) {
       console.error(err);
-      alert("Payment failed. Try again.");
+      alert("Failed to proceed to checkout. Try again.");
     }
   };
 
   // Add to Cart
   const handleAddToCart = async (id) => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     try {
       const res = await BaseUrl.post(
         `addtocart/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(res.data);
-
-      setAlreadyInCart(true); // mark course as added
-      navigate(`/Addtocart`);
+      setAlreadyInCart(true);
+      navigate(`/AddtoCart`);
     } catch (error) {
       console.error(error);
     }
@@ -145,7 +136,6 @@ const SingleCourseDetails = () => {
 
   return (
     <>
-      <NavBar />
       <div className="course-page">
         <div className="container">
           <div className="row g-4">
@@ -224,31 +214,34 @@ const SingleCourseDetails = () => {
                   <span className="discount">Limited time offer</span>
                 </div>
 
-                {/* Add to Cart button */}
-                {!isPurchased ? (
-                  <>
+                <div className="action-buttons-box">
+                  {/* Add to Cart / Buy button vs Go to Course */}
+                  {!isPurchased ? (
+                    <>
+                      <button
+                        className="btn btn-primary w-100 mb-2"
+                        onClick={() => handleAddToCart(course.id)}
+                        disabled={alreadyInCart}
+                      >
+                        {alreadyInCart ? "Already in Cart" : "Add to cart"}
+                      </button>
+                      <button
+                        className="btn btn-outline-primary w-100"
+                        onClick={buyCourse}
+                      >
+                        Buy now
+                      </button>
+                    </>
+                  ) : (
                     <button
-                      className="btn btn-primary w-100 mb-2"
-                      onClick={() => handleAddToCart(course.id)}
-                      disabled={alreadyInCart}
+                      className="btn btn-success w-100 mb-2"
+                      onClick={() => navigate(`/SingleCourse/${course.id}`)}
+                      style={{ fontSize: "16px", fontWeight: "bold" }}
                     >
-                      {alreadyInCart ? "Already in Cart" : "Add to cart"}
+                      Watch Course
                     </button>
-                    <button
-                      className="btn btn-outline-primary w-100"
-                      onClick={() => navigate(`/Payment/${course.id}`)}
-                    >
-                      Buy now
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="btn btn-success w-100 mb-2"
-                    onClick={() => navigate(`/SingleCourse/${course.id}`)}
-                  >
-                    Go to Course
-                  </button>
-                )}
+                  )}
+                </div>
 
                 <p className="guarantee">30-Day Money-Back Guarantee</p>
                 <ul className="features">

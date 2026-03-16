@@ -15,6 +15,7 @@ import {
   Video,
   ChevronRight,
   Info,
+  ClipboardList,
   Image as ImageIcon
 } from "lucide-react";
 import "../AdminStyles/AdminCourseDetails.css";
@@ -154,6 +155,7 @@ const AdminCourseDetails = () => {
           </button>
           <div className="nav-actions">
             <button className="secondary-btn" onClick={() => navigate(`/editcourses/${id}`)}>Edit Course</button>
+            <button className="secondary-btn" onClick={() => navigate(`/AdminAddExam/${id}`)}>Add Exam</button>
             <button className="secondary-btn" onClick={() => navigate(`/addVideos/${id}`)}>Add Videos</button>
           </div>
         </div>
@@ -237,7 +239,20 @@ const AdminCourseDetails = () => {
                         <div className="play-index">{index + 1}</div>
                         <div className="play-info">
                           <span className="play-label">Lesson {index + 1}</span>
-                          <span className="play-status">{currentVideo?.videoId === v.videoId ? "Playing..." : "Available"}</span>
+                          <div className="playlist-actions">
+                            <span className="play-status">{currentVideo?.videoId === v.videoId ? "Playing..." : "Available"}</span>
+                            <button
+                              className="view-exam-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/AdminViewExam/${v.videoId}`);
+                              }}
+                              title="View Exam"
+                            >
+                              <ClipboardList size={14} />
+                              <span>View Exam</span>
+                            </button>
+                          </div>
                         </div>
                         {currentVideo?.videoId === v.videoId && <PlayCircle size={16} className="active-icon" />}
                       </div>

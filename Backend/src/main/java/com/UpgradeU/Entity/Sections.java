@@ -31,13 +31,13 @@ public class Sections {
 	
 	
 	@OneToMany(mappedBy = "section", cascade=CascadeType.ALL)
-	private List<videoEntity> video;
+	private List<VideoEntity> video;
 	
 	
 	private String sectionname;
 
 
-	public Sections(int id, Course course, List<videoEntity> video, String sectionname) {
+	public Sections(int id, Course course, List<VideoEntity> video, String sectionname) {
 		super();
 		this.id = id;
 		this.course = course;
@@ -66,12 +66,12 @@ public class Sections {
 	}
 
 
-	public List<videoEntity> getVideo() {
+	public List<VideoEntity> getVideo() {
 		return video;
 	}
 
 
-	public void setVideo(List<videoEntity> video) {
+	public void setVideo(List<VideoEntity> video) {
 		this.video = video;
 	}
 

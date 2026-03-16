@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import BaseUrl from "../Components/BaseUrl";
 import { useAuth } from "../Components/Authprovider";
+import { useNavigate } from "react-router-dom";
 import "../Styles/GetBlogs.css";
-import NavBar from "../UserDashboardComponent/NavBar";
 
 const GetBlogList = () => {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,8 +82,9 @@ const GetBlogList = () => {
   return (
 
     <>
-      <NavBar />
       <div className="blog-list-page">
+
+
         <div className="blog-header">
           <h2 className="blog-list-title">Insights & Articles</h2>
           <p className="blog-list-subtitle">Explore the latest trends, tutorials, and career advice from industry experts.</p>

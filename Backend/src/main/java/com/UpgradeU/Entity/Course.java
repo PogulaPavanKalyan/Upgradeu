@@ -34,7 +34,7 @@ public class Course {
 	private CourseImageEntity thumbnailimage;
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonBackReference
-	private List<videoEntity> video;
+	private List<VideoEntity> video;
 	private LocalDateTime date;
 	
 	@OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
@@ -42,7 +42,7 @@ public class Course {
 	
 
 	public Course(Long id, String course_duration, String title, String mode, String course_Name, String description,
-			long price, String category, CourseImageEntity thumbnailimage, List<videoEntity> video, LocalDateTime date,
+			long price, String category, CourseImageEntity thumbnailimage, List<VideoEntity> video, LocalDateTime date,
 			List<Sections> sections) {
 		super();
 		this.id = id;
@@ -131,11 +131,11 @@ public class Course {
 		this.thumbnailimage = thumbnailimage;
 	}
 
-	public List<videoEntity> getVideo() {
+	public List<VideoEntity> getVideo() {
 		return video;
 	}
 
-	public void setVideo(List<videoEntity> video) {
+	public void setVideo(List<VideoEntity> video) {
 		this.video = video;
 	}
 

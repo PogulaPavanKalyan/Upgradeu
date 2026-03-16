@@ -25,6 +25,10 @@ const AdminPaymentDetails = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [courseFilter, setCourseFilter] = useState("All");
+
+  const courseOptions = ["All", ...new Set(payments.map(pay => pay.course?.course_Name).filter(Boolean))];
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -46,14 +50,36 @@ const AdminPaymentDetails = () => {
   }, [token]);
 
   useEffect(() => {
-    const results = payments.filter(pay =>
-      pay.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pay.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pay.course?.course_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pay.paymentId?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let results = payments.filter(pay => {
+      const matchesSearch = pay.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          pay.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          pay.course?.course_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          pay.paymentId?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCourse = courseFilter === "All" || pay.course?.course_Name === courseFilter;
+      
+      return matchesSearch && matchesCourse;
+    });
     setFilteredPayments(results);
-  }, [searchTerm, payments]);
+  }, [searchTerm, payments, courseFilter]);
+
+  const handleExportCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Order ID,Customer,Email,Course,Amount,Date,Time\n";
+    
+    filteredPayments.forEach(pay => {
+      const amount = pay.amount || pay.totalAmount || pay.course?.price || 0;
+      csvContent += `${pay.paymentId || pay.id},${pay.user?.username},${pay.user?.email},${pay.course?.course_Name},₹${amount},${pay.date},${pay.time}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Payments_Report_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const totalRevenue = payments.reduce((acc, pay) => acc + (pay.amount || pay.totalAmount || pay.course?.price || 0), 0);
 
@@ -115,11 +141,22 @@ const AdminPaymentDetails = () => {
           />
         </div>
         <div className="action-button-group">
-          <button className="control-outline-btn">
-            <Filter size={16} />
-            <span>Filter</span>
-          </button>
-          <button className="control-outline-btn">
+          <div className="dropdown-container">
+            <button className={`control-outline-btn ${courseFilter !== "All" ? "active" : ""}`} onClick={() => setIsFilterOpen(!isFilterOpen)}>
+              <Filter size={16} />
+              <span>{courseFilter === "All" ? "Filter" : courseFilter}</span>
+            </button>
+            {isFilterOpen && (
+              <div className="dropdown-menu">
+                {courseOptions.map(opt => (
+                  <button key={opt} onClick={() => { setCourseFilter(opt); setIsFilterOpen(false); }}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className="control-outline-btn" onClick={handleExportCSV}>
             <Download size={16} />
             <span>Export CSV</span>
           </button>

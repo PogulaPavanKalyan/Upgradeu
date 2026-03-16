@@ -1,0 +1,323 @@
+/* =========================================
+   ADMIN VIEW EXAM - PREMIUM UI
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --e-primary: #6366f1;
+  --e-primary-glow: rgba(99, 102, 241, 0.4);
+  --e-success: #10b981;
+  --e-danger: #ef4444;
+  --e-warning: #f59e0b;
+  --e-bg: #0f172a;
+  --e-card-bg: rgba(30, 41, 59, 0.7);
+  --e-glass-bg: rgba(255, 255, 255, 0.03);
+  --e-glass-border: rgba(255, 255, 255, 0.1);
+  --e-text-bright: #f8fafc;
+  --e-text-dim: #94a3b8;
+  --e-radius-lg: 24px;
+  --e-radius-md: 16px;
+  --e-font: 'Plus Jakarta Sans', sans-serif;
+}
+
+.light-theme {
+  --e-bg: #f8fafc;
+  --e-card-bg: #ffffff;
+  --e-glass-bg: rgba(0, 0, 0, 0.03);
+  --e-glass-border: rgba(0, 0, 0, 0.1);
+  --e-text-bright: #0f172a;
+  --e-text-dim: #64748b;
+  --e-success: #059669;
+}
+
+.ave-viewport {
+  min-height: 100vh;
+  background: var(--e-bg);
+  color: var(--e-text-bright);
+  font-family: var(--e-font);
+  display: flex;
+  padding: 40px;
+  gap: 40px;
+}
+
+/* SIDEBAR / PALETTE */
+.ave-sidebar {
+  width: 340px;
+  background: var(--e-card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--e-glass-border);
+  border-radius: var(--e-radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 40px;
+  height: calc(100vh - 80px);
+}
+
+.ave-sidebar h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ave-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.palette-btn {
+  aspect-ratio: 1;
+  background: var(--e-glass-bg);
+  border: 1px solid var(--e-glass-border);
+  border-radius: 12px;
+  color: var(--e-text-dim);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.palette-btn:hover {
+  background: var(--e-glass-border);
+  transform: translateY(-2px);
+  color: var(--e-text-bright);
+}
+
+.palette-btn.active {
+  background: var(--e-primary);
+  border-color: var(--e-primary);
+  color: white;
+  box-shadow: 0 0 20px var(--e-primary-glow);
+}
+
+/* MAIN CONTENT */
+.ave-main {
+  flex: 1;
+  max-width: 900px;
+}
+
+.ave-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--e-glass-bg);
+  border: 1px solid var(--e-glass-border);
+  color: var(--e-text-bright);
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: var(--e-glass-border);
+  transform: translateX(-4px);
+}
+
+.instructor-badge {
+  background: linear-gradient(135deg, var(--e-warning), #d97706);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* EXAM INFO CARD */
+.ave-info-card {
+  margin-bottom: 32px;
+}
+
+.ave-info-card h1 {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--e-text-bright);
+}
+
+.exam-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--e-text-dim);
+}
+
+.stat-item strong {
+  color: var(--e-text-bright);
+}
+
+/* QUESTION CARD */
+.question-card {
+  background: var(--e-card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--e-glass-border);
+  border-radius: var(--e-radius-lg);
+  padding: 48px;
+  margin-bottom: 32px;
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.q-number {
+  color: var(--e-primary);
+  font-weight: 800;
+  font-size: 18px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.q-text {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
+.options-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  background: var(--e-glass-bg);
+  border: 1px solid var(--e-glass-border);
+  border-radius: var(--e-radius-md);
+  transition: all 0.2s;
+}
+
+.option-item.correct {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--e-success);
+}
+
+.opt-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--e-glass-border);
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-item.correct .opt-indicator {
+  background: var(--e-success);
+  border-color: var(--e-success);
+  color: white;
+}
+
+.opt-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.correct-tag {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--e-success);
+  text-transform: uppercase;
+}
+
+/* ACTIONS */
+.ave-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-controls {
+  display: flex;
+  gap: 16px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--e-glass-bg);
+  border: 1px solid var(--e-glass-border);
+  color: var(--e-text-bright);
+  padding: 14px 28px;
+  border-radius: var(--e-radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.action-btn:not(:disabled):hover {
+  background: var(--e-glass-border);
+  transform: translateY(-2px);
+}
+
+.action-btn.primary {
+  background: var(--e-primary);
+  border-color: var(--e-primary);
+}
+
+.action-btn.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--e-danger);
+  color: var(--e-danger);
+}
+
+.action-btn.danger:hover {
+  background: var(--e-danger);
+  color: white;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .ave-viewport {
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  .ave-sidebar {
+    width: 100%;
+    position: static;
+    height: auto;
+  }
+
+  .ave-main {
+    max-width: 100%;
+  }
+}

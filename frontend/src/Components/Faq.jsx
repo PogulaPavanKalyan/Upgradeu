@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../Styles/faq.css"
 
 
@@ -57,10 +58,13 @@ const faqData = [
 
 const Faq = () => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const navigate = useNavigate();
 
   return (
-    <section className="faq-bg">
+    <section className="faq-bg" style={{ position: "relative" }}>
       
+      
+
       <div className="faq-overlay">
         <div className="faq-container">
           <h2 className="faq-title">Frequently Asked Questions</h2>

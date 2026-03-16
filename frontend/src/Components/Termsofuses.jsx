@@ -1,13 +1,13 @@
 import React from "react";
 import "../Styles/TermsOfUses.css";
-import NavBar from "../UserDashboardComponent/NavBar";
+import { useNavigate } from "react-router-dom";
 
 const TermsOfUses = () => {
+  const navigate = useNavigate();
   return (
     <>
-      <NavBar />
-      <div className="terms-container">
-        <h1 className="terms-title">Terms of Use</h1>
+      <div className="terms-container" style={{ position: "relative" }}>
+        <h1 className="terms-title" style={{ marginTop: "40px" }}>Terms of Use</h1>
 
         <section className="terms-section">
           <h2>1. Acceptance of Terms</h2>

@@ -158,7 +158,7 @@
 .filter-pill-btn {
   background: white;
   border: 1px solid var(--c-border);
-  padding: 0 20px;
+  padding: 10px;
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -172,6 +172,112 @@
 
 .filter-pill-btn:hover {
   background: var(--c-bg);
+}
+
+.filter-pill-btn.active {
+  background: var(--c-primary-soft);
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.filter-container {
+  position: relative;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 320px;
+  background: white;
+  border-radius: 18px;
+  border: 1px solid var(--c-border);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 100;
+  padding: 24px;
+  animation: dropdownSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--c-text-gray);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-options button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-options button:hover {
+  background: var(--c-bg);
+  border-color: var(--c-text-gray);
+}
+
+.filter-options button.active {
+  background: var(--c-primary);
+  color: white;
+  border-color: var(--c-primary);
+}
+
+.filter-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-border);
+}
+
+.reset-btn {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text-gray);
+  cursor: pointer;
+}
+
+.apply-btn {
+  background: var(--c-primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 /* TABLE STYLES */

@@ -21,6 +21,10 @@ const RegisterUser = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [roleFilter, setRoleFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("Newest");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,13 +54,24 @@ const RegisterUser = () => {
   }, []);
 
   useEffect(() => {
-    const results = students.filter(student =>
-      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.username?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let results = students.filter(student => {
+      const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          student.username?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesRole = roleFilter === "All" || student.role?.toLowerCase() === roleFilter.toLowerCase();
+      
+      return matchesSearch && matchesRole;
+    });
+
+    if (sortBy === "Name") {
+      results.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortBy === "Recent") {
+      results.sort((a, b) => (b.id || 0) - (a.id || 0));
+    }
+
     setFilteredStudents(results);
-  }, [searchTerm, students]);
+  }, [searchTerm, students, roleFilter, sortBy]);
 
   if (loading) return (
     <div className="users-loading-viewport">
@@ -108,14 +123,32 @@ const RegisterUser = () => {
           />
         </div>
         <div className="filter-actions">
-          <button className="control-btn">
-            <Filter size={16} />
-            <span>Filter</span>
-          </button>
-          <button className="control-btn">
-            <ArrowUpDown size={16} />
-            <span>Sort</span>
-          </button>
+          <div className="dropdown-container">
+            <button className={`control-btn ${roleFilter !== "All" ? "active" : ""}`} onClick={() => { setIsFilterOpen(!isFilterOpen); setIsSortOpen(false); }}>
+              <Filter size={16} />
+              <span>{roleFilter === "All" ? "Filter" : roleFilter}</span>
+            </button>
+            {isFilterOpen && (
+              <div className="dropdown-menu">
+                <button onClick={() => { setRoleFilter("All"); setIsFilterOpen(false); }}>All Roles</button>
+                <button onClick={() => { setRoleFilter("Admin"); setIsFilterOpen(false); }}>Admin</button>
+                <button onClick={() => { setRoleFilter("Student"); setIsFilterOpen(false); }}>Student</button>
+              </div>
+            )}
+          </div>
+
+          <div className="dropdown-container">
+            <button className="control-btn" onClick={() => { setIsSortOpen(!isSortOpen); setIsFilterOpen(false); }}>
+              <ArrowUpDown size={16} />
+              <span>Sort: {sortBy}</span>
+            </button>
+            {isSortOpen && (
+              <div className="dropdown-menu">
+                <button onClick={() => { setSortBy("Newest"); setIsSortOpen(false); }}>Newest First</button>
+                <button onClick={() => { setSortBy("Name"); setIsSortOpen(false); }}>Name (A-Z)</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

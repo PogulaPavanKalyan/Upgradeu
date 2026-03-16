@@ -11,8 +11,6 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    padding-top: 80px;
-    /* Space for fixed navbar */
 }
 
 /* Protection Overlays Removed for Debugging */

@@ -46,7 +46,7 @@ const PaymentPage = () => {
   if (!course) return <h2>Loading course details...</h2>;
 
   return (
-    <div className="payment-container">
+    <div className="payment-container" style={{ position: "relative", paddingTop: "70px" }}>
       <div className="payment-left">
         <h2>Select Payment Method</h2>
         <div className="payment-card" onClick={() => handlePayment("UPI")}>

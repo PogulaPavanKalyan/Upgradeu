@@ -1,7 +1,7 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/AboutUs.css";
-import NavBar from "./NavBar";
+import { useNavigate } from "react-router-dom";
 import Founder from "../Components/Founder";
 import ourjourney from "../assets/images/ourjourney.png";
 import { motion } from "framer-motion";
@@ -14,9 +14,12 @@ const fadeUp = {
 };
 
 const AboutUs = () => {
+  const navigate = useNavigate();
   return (
     <div className="about-page-wrapper">
-      <NavBar />
+
+      <div className="container mt-4">
+      </div>
 
       {/* ================= HERO SECTION (Magazine Style) ================= */}
       <section className="about-hero container py-5">
@@ -232,7 +235,8 @@ const AboutUs = () => {
       <section className="cta-section py-5 bg-black text-center text-white">
         <div className="container py-5">
           <h2 className="playfair-font mb-4">Ready to Build Your Future?</h2>
-          <button className="btn btn-gold btn-lg rounded-0 px-5 fw-bold text-uppercase tracking-wider">
+          
+          <button onClick={()=>navigate("/courses")} className="btn btn-gold btn-lg rounded-0 px-5 fw-bold text-uppercase tracking-wider">
             Start Your Journey
           </button>
         </div>

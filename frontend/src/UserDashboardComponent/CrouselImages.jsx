@@ -15,15 +15,16 @@ const CrouselImages = ({ userName }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await BaseUrl.get("/getcrouselimagelist", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await BaseUrl.get("/getcrouselimagelist", { headers });
         setItems(res.data);
       } catch (err) {
         console.error("Fetch carousel data error:", err);
       }
     };
-    if (token) fetchData();
+    fetchData();
   }, [token]);
 
   useEffect(() => {
@@ -31,8 +32,11 @@ const CrouselImages = ({ userName }) => {
       const map = {};
       try {
         for (const item of items) {
+          const headers = {};
+          if (token) headers.Authorization = `Bearer ${token}`;
+
           const res = await BaseUrl.get(`/getcrouselimage/${item.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers,
             responseType: "blob",
           });
           map[item.id] = URL.createObjectURL(res.data);

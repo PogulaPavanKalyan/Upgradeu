@@ -20,7 +20,7 @@
   color: var(--black-text);
   overflow-x: hidden;
   background-color: var(--bg-main);
-  margin-top: 100px;
+  margin-top: 0;
 }
 
 /* Typography Utilities */

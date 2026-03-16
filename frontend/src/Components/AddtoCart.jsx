@@ -1,33 +1,36 @@
 import React, { useEffect, useState } from "react";
-
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  Trash2, 
+  ShoppingBag, 
+  ArrowRight, 
+  CreditCard, 
+  ShoppingCart,
+  BookOpen,
+  Info
+} from "lucide-react";
 import { useAuth } from "./Authprovider";
-import { useNavigate } from "react-router-dom";
-import "../Styles/AddtoCart.css";
 import BaseUrl from "../Components/BaseUrl";
-import NavBar from "../UserDashboardComponent/NavBar";
+import "../Styles/AddtoCart.css";
 
 const AddtoCart = () => {
   const { token } = useAuth();
   const [cart, setCart] = useState([]);
   const [images, setImages] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   /* ================= FETCH CART ================= */
   const fetchCart = async () => {
     if (!token) return;
-
+    setLoading(true);
     try {
-      const res = await BaseUrl.get(
-        "getcart",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await BaseUrl.get("getcart");
       setCart(res.data);
     } catch (err) {
       console.error("Failed to fetch cart", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,7 +46,6 @@ const AddtoCart = () => {
         if (!item.course || !item.course.id) return;
         try {
           const res = await BaseUrl.get(`getimage/${item.course.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
             responseType: "blob",
           });
           imageMap[item.course.id] = URL.createObjectURL(res.data);
@@ -70,22 +72,11 @@ const AddtoCart = () => {
 
   /* ================= DELETE CART ITEM ================= */
   const handleDeleteCart = async (cartId, e) => {
-    e.stopPropagation(); // prevent navigation
+    e.stopPropagation();
 
     try {
-      await BaseUrl.delete(
-        `deletecart/${cartId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Update UI immediately
-      setCart((prev) =>
-        prev.filter((item) => item.id !== cartId)
-      );
+      await BaseUrl.delete(`deletecart/${cartId}`);
+      setCart((prev) => prev.filter((item) => item.id !== cartId));
     } catch (err) {
       console.error("Failed to delete cart item", err);
     }
@@ -97,74 +88,125 @@ const AddtoCart = () => {
     0
   );
 
+  if (loading) {
+    return (
+      <div className="cart-page-wrapper">
+        <div className="cart-container-premium" style={{textAlign: 'center', paddingTop: '100px'}}>
+           <div className="spinner"></div>
+           <p style={{color: 'var(--text-muted)', marginTop: '20px'}}>Refreshing your cart...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-
-      <NavBar />
-      <div className="cart-page container">
-        <h2>Your Cart</h2>
-
+    <div className="cart-page-wrapper">
+      <div className="cart-container-premium">
+        
         {cart.length === 0 ? (
-          <p className="empty-cart">Your cart is empty</p>
+          <div className="empty-cart-showcase">
+            <div className="empty-icon-wrap">
+              <ShoppingBag size={48} />
+            </div>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added any courses yet. Start your learning journey today!</p>
+            <Link to="/Courses" className="explore-btn">
+              Explore Courses <ArrowRight size={18} />
+            </Link>
+          </div>
         ) : (
           <>
-            <div className="cart-grid">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="cart-card"
-                  onClick={() =>
-                    navigate(`/SingleCourseDetails/${item.course.id}`)
-                  }
-                >
-                  <img
-                    src={images[item.course.id] || "https://via.placeholder.com/200"}
-                    alt={item.course.title}
-                    className="cart-thumbnail"
-                  />
-
-                  <div className="cart-details">
-                    <h4 className="course-title">
-                      {item.course.title}
-                    </h4>
-
-                    <p className="course-desc">
-                      {item.course.description}
-                    </p>
-
-                    <p className="course-price">
-                      <strong>Price:</strong> ₹{item.course.price}
-                    </p>
-
-                    {/* DELETE BUTTON */}
-                    <button
-                      className="cart-delete-btn"
-                      onClick={(e) =>
-                        handleDeleteCart(item.id, e)
-                      }
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="cart-header">
+              <h1>Shopping Cart</h1>
+              <span className="cart-count-badge">{cart.length} Courses</span>
             </div>
 
-            {/* TOTAL */}
-            <div className="cart-total">
-              <h3>Total: ₹{totalPrice}</h3>
+            <div className="cart-layout-grid">
+              {/* LEFT: Items List */}
+              <div className="cart-items-stack">
+                {cart.map((item) => (
+                  <div
+                    key={item.id}
+                    className="cart-item-premium"
+                    onClick={() => navigate(`/SingleCourseDetails/${item.course.id}`)}
+                  >
+                    <div className="item-visual-wrap">
+                      <img
+                        src={images[item.course.id] || "https://via.placeholder.com/400x250"}
+                        alt={item.course.title}
+                        className="item-image"
+                      />
+                    </div>
 
-              <button
-                className="checkout-btn"
-                onClick={() => navigate("/checkout")}
-              >
-                Proceed to Checkout
-              </button>
+                    <div className="item-info">
+                      <div className="item-meta">
+                        <h3>{item.course.title}</h3>
+                        <p className="item-desc">{item.course.description}</p>
+                      </div>
+
+                      <div className="item-controls">
+                        <span className="item-price">₹{item.course.price.toLocaleString()}</span>
+                        <button
+                          className="remove-action-btn"
+                          onClick={(e) => handleDeleteCart(item.id, e)}
+                        >
+                          <Trash2 size={16} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* RIGHT: Order Summary */}
+              <aside className="order-summary-sidebar">
+                <h2 className="summary-title">Order Summary</h2>
+                
+                <div className="summary-details">
+                  <div className="summary-row">
+                    <span>Courses ({cart.length})</span>
+                    <span>₹{totalPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Platform Fee</span>
+                    <span style={{color: 'var(--success)'}}>FREE</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Tax</span>
+                    <span>Included</span>
+                  </div>
+                  
+                  <div className="summary-row total">
+                    <span>Total Amount</span>
+                    <span>₹{totalPrice.toLocaleString()}</span>
+                  </div>
+
+                  <button
+                    className="premium-checkout-btn"
+                    onClick={() => navigate("/checkout")}
+                  >
+                    <CreditCard size={20} /> Checkout Now
+                  </button>
+                  
+                  <p style={{ 
+                    textAlign: 'center', 
+                    fontSize: '0.8rem', 
+                    color: 'var(--text-muted)', 
+                    marginTop: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}>
+                    <Info size={12} /> Secure Checkout by Razorpay
+                  </p>
+                </div>
+              </aside>
             </div>
           </>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

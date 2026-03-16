@@ -82,7 +82,6 @@ const UserDashboard = () => {
   return (
     <>
 
-      <NavBar />
       {showNotification && (
         <div className="feedback-notification">
           <div className="notification-content">
@@ -306,111 +305,6 @@ const UserDashboard = () => {
 
 
 
-      {/* FOOTER */}
-      <footer className="footer">
-
-        {/* Column 1: Brand & About */}
-        <div className="footer-section brand-section">
-          <h3>UpgradeU</h3>
-          <p className="footer-desc">
-            Empowering professional growth with industry-leading courses and certifications.
-            Learn, apply, and upgrade your career today.
-          </p>
-          <div className="social-links-text">
-            <span><a href="https://www.linkedin.com/company/ygr-gobal-it-services-pvt-ltd/" target="blank">LinkedIN</a></span> | <span> <a href="https://youtube.com/@rrtalktrends?si=ePSFA_O-lA0-YLqH" target="blank">YouTube</a></span> | <span > <a href="https://www.instagram.com/ygrgobalitservices?igsh=bGpkY3Rscmt0OWN4" target="blank">Instagram</a></span>
-          </div>
-        </div>
-
-        {/* Column 2: Platform & Company */}
-        <div className="footer-section">
-          <h3>Platform</h3>
-          <p onClick={() => navigate(`/Aboutus`)}>About Us</p>
-          <p onClick={() => navigate(`/GetBlogs`)}>Blog & Insights</p>
-          <p onClick={() => navigate(`/Contactform`)}>Careers & Teaching</p>
-          <p onClick={() => navigate(`/Contactform`)}>Plans & Pricing</p>
-          <p onClick={() => navigate(`/Contactform`)}>Contact Support</p>
-        </div>
-
-        {/* Column 3: Popular Domains (Interactive) */}
-        <div className="footer-section">
-          <h3>Trending Domains</h3>
-
-          {/* Web Development Dropdown */}
-          <div className="footer-dropdown">
-            <p className="footer-dropdown-trigger" onClick={() => toggleDropdown('web')}>
-              Web & Full Stack {activeDropdown === 'web' ? '▲' : '▼'}
-            </p>
-            <div className={`footer-dropdown-content ${activeDropdown === 'web' ? 'active' : ''}`}>
-              <p onClick={() => navigate(`/Courses`)}>Web Development</p>
-              <p onClick={() => navigate(`/javascriptinfo`)}>JavaScript</p>
-              <p onClick={() => navigate(`/reactinfo`)}>React JS</p>
-              <p onClick={() => navigate(`/angularinfo`)}>Angular</p>
-              <p onClick={() => navigate(`/javainfo`)}>Java</p>
-              <p onClick={() => navigate(`/nodejsinfo`)}>Node JS</p>
-              <p onClick={() => navigate(`/mongodbinfo`)}>MongoDB</p>
-            </div>
-          </div>
-
-          {/* Data Science Dropdown */}
-          <div className="footer-dropdown">
-            <p className="footer-dropdown-trigger" onClick={() => toggleDropdown('data')}>
-              Data Science & AI {activeDropdown === 'data' ? '▲' : '▼'}
-            </p>
-            <div className={`footer-dropdown-content ${activeDropdown === 'data' ? 'active' : ''}`}>
-              <p onClick={() => navigate(`/datascienceinfo`)}>Data Science</p>
-              <p onClick={() => navigate(`/pythoninfo`)}>Python</p>
-              <p onClick={() => navigate(`/machinelearninginfo`)}>Machine Learning</p>
-              <p onClick={() => navigate(`/chatgptinfo`)}>ChatGPT</p>
-            </div>
-          </div>
-
-          {/* Cloud Computing Dropdown */}
-          <div className="footer-dropdown">
-            <p className="footer-dropdown-trigger" onClick={() => toggleDropdown('cloud')}>
-              Cloud Computing {activeDropdown === 'cloud' ? '▲' : '▼'}
-            </p>
-            <div className={`footer-dropdown-content ${activeDropdown === 'cloud' ? 'active' : ''}`}>
-              <p onClick={() => navigate(`/awsinfo`)}>Amazon AWS</p>
-              <p onClick={() => navigate(`/azureinfo`)}>Microsoft Azure</p>
-              <p onClick={() => navigate(`/kubernetesinfo`)}>Kubernetes</p>
-              <p onClick={() => navigate(`/cybersecurityinfo`)}>Cybersecurity</p>
-            </div>
-          </div>
-
-          {/* Business & Marketing Dropdown */}
-          <div className="footer-dropdown">
-            <p className="footer-dropdown-trigger" onClick={() => toggleDropdown('business')}>
-              Business & Marketing {activeDropdown === 'business' ? '▲' : '▼'}
-            </p>
-            <div className={`footer-dropdown-content ${activeDropdown === 'business' ? 'active' : ''}`}>
-              <p onClick={() => navigate(`/digitalmarketinginfo`)}>Digital Marketing</p>
-              <p onClick={() => navigate(`/projectmanagementinfo`)}>Project Management</p>
-              <p onClick={() => navigate(`/excelinfo`)}>Microsoft Excel</p>
-              <p onClick={() => navigate(`/powerbiinfo`)}>Power BI</p>
-            </div>
-          </div>
-
-          <p onClick={() => navigate(`/Courses`)} className="highlight-link">View All Courses →</p>
-        </div>
-
-        {/* Column 4: Legal & Policy */}
-        <div className="footer-section">
-          <h3>Legal & Support</h3>
-          <p onClick={() => navigate(`/termsofuses`)}>Terms of Use</p>
-          <p onClick={() => navigate(`/legal-protection`)}>Privacy Policy</p>
-          <p onClick={() => navigate(`/RefundPolicy`)}>Refund Policy</p>
-          <p onClick={() => navigate(`/accessibility`)}>Accessibility</p>
-          <p onClick={() => navigate(`/sitemap`)}>Sitemap</p>
-        </div>
-
-      </footer>
-
-      <div className="footer-bottom">
-        <div className="footer-bottom-content">
-          <p>© 2025 <strong>UpgradeU</strong>. All Rights Reserved.</p>
-          <p className="designer-credit">Designed By <strong>YGR GOBAL IT SERVICES.pvt.ltd,2023</strong></p>
-        </div>
-      </div>
     </>
   );
 };

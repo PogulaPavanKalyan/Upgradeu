@@ -12,7 +12,14 @@ import "../Styles/CourseListing.css";
 const CourseCard = ({ course, badge, images, navigate }) => (
   <div
     className="course-card"
-    onClick={() => navigate(`/SingleCourseDetails/${course.id}`)}
+    onClick={() => {
+      const token = localStorage.getItem("token");
+      if (token && course.isEnrolled) {
+        navigate(`/SingleCourse/${course.id}`);
+      } else {
+        navigate(`/SingleCourseDetails/${course.id}`);
+      }
+    }}
   >
     {badge && <div className={`course-badge ${badge.type}`}>{badge.text}</div>}
 
@@ -47,10 +54,15 @@ const CourseCard = ({ course, badge, images, navigate }) => (
         className="know-more-btn"
         onClick={(e) => {
           e.stopPropagation();
-          navigate(`/SingleCourseDetails/${course.id}`);
+          const token = localStorage.getItem("token");
+          if (token && course.isEnrolled) {
+            navigate(`/SingleCourse/${course.id}`);
+          } else {
+            navigate(`/SingleCourseDetails/${course.id}`);
+          }
         }}
       >
-        View Details
+        {course.isEnrolled ? "Watch Course" : "View Details"}
       </button>
     </div>
   </div>
@@ -129,22 +141,53 @@ const CourseListings = () => {
   const [images, setImages] = useState({});
 
   useEffect(() => {
-    if (!token) return;
+    const fetchData = async () => {
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        
+        // Fetch All Courses
+        const coursesRes = await BaseUrl.get("/Course", { headers });
+        let allCourses = coursesRes.data;
 
-    BaseUrl.get("/Course", {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => setCourses(res.data));
+        // Fetch Enrolled Courses if logged in
+        if (token) {
+          try {
+            const enrolledRes = await BaseUrl.get("mypaymentuser");
+            const enrolledIds = new Set(enrolledRes.data.map(item => item.course.id));
+            
+            // Mark courses as enrolled
+            allCourses = allCourses.map(c => ({
+              ...c,
+              isEnrolled: enrolledIds.has(c.id)
+            }));
+          } catch (err) {
+            console.error("Error fetching enrolled courses:", err);
+          }
+        }
+        
+        setCourses(allCourses);
+      } catch (err) {
+        console.error("Error loading courses on dashboard:", err);
+      }
+    };
+
+    fetchData();
   }, [token]);
 
   useEffect(() => {
-    if (!token || courses.length === 0) return;
+    if (courses.length === 0) return;
 
     const loadImages = async () => {
       const map = {};
       for (const c of courses) {
         try {
+          const headers = {};
+          if (token) {
+            headers.Authorization = `Bearer ${token}`;
+          }
+
           const res = await BaseUrl.get(`/getimage/${c.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers,
             responseType: "blob",
           });
           map[c.id] = URL.createObjectURL(res.data);
