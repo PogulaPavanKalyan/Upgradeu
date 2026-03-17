@@ -2,12 +2,11 @@ package com.UpgradeU.Controller;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,13 +26,7 @@ import com.UpgradeU.Entity.CrouselDataEntity;
 import com.UpgradeU.Entity.Exam;
 import com.UpgradeU.Entity.PaymentEntity;
 import com.UpgradeU.Entity.Sections;
-import com.UpgradeU.Entity.VideoEntity;
-import com.UpgradeU.Repo.CourseImageRepo;
-import com.UpgradeU.Repo.CourseRepo;
-
 import com.UpgradeU.Repo.PaymentRepo;
-import com.UpgradeU.Repo.UserRepo;
-import com.UpgradeU.Repo.VideoRepo;
 import com.UpgradeU.Service.BackgroundImageService;
 import com.UpgradeU.Service.BlogsService;
 import com.UpgradeU.Service.CourseImageService;
@@ -42,6 +35,8 @@ import com.UpgradeU.Service.ExamService;
 import com.UpgradeU.Service.SectionsService;
 import com.UpgradeU.Service.VideoService;
 import com.UpgradeU.Service.courseService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 
 @CrossOrigin(origins = "*")
@@ -56,13 +51,7 @@ public class AdminController {
 	private courseService courseservice;
 
 	@Autowired
-	private VideoRepo ve;
-
-	@Autowired
 	private VideoService vs;
-
-	@Autowired
-	private CourseImageRepo re;
 
 	@Autowired
 	private CourseImageService ser;
@@ -77,13 +66,7 @@ public class AdminController {
 	private BackgroundImageService bis;
 
 	@Autowired
-	private UserRepo ur;
-
-	@Autowired
 	private PaymentRepo pr;
-
-	@Autowired
-	private CourseRepo cr;
 
 	@Autowired
 	private SectionsService ss;
@@ -105,35 +88,77 @@ public class AdminController {
 		return ResponseEntity.ok(updatedCourse);
 	}
 
+//	@DeleteMapping("/deletecourse/{id}")
+//	@Transactional
+//	public ResponseEntity<Void> deleteCourse(@PathVariable("id") Long id)
+//
+//	{
+//
+//		Optional<Course> course = cr.findById(id);
+//		List<VideoEntity> videoentity = ve.findByCourseId(id);
+//		for (var c : videoentity) {
+//			ve.deleteById(c.getId());
+//		}
+//
+//		if (course.isPresent()) {
+//
+//			cr.deleteById(id);
+//			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//
+//		} else {
+//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//
+//		}
+//
+//	}
+	
+	
 	@DeleteMapping("/deletecourse/{id}")
-	@Transactional
-	public ResponseEntity<Void> deleteCourse(@PathVariable("id") Long id)
+	public ResponseEntity<String> deleteCourse(@PathVariable("id") Long id) {
 
-	{
+	    try {
+	        courseservice.deleteCourse(id);
+	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-		Optional<Course> course = cr.findById(id);
-		List<VideoEntity> videoentity = ve.findByCourseId(id);
-		for (var c : videoentity) {
-			ve.deleteById(c.getId());
-		}
+	    } catch (EntityNotFoundException e) {
+	        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 
-		if (course.isPresent()) {
+	    } catch (DataIntegrityViolationException e) {
+	        return new ResponseEntity<>(
+	            "Cannot delete — course has linked records: " + e.getRootCause().getMessage(),
+	            HttpStatus.CONFLICT
+	        );
 
-			cr.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-		}
-
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(
+	            "Delete failed: " + e.getMessage(),
+	            HttpStatus.INTERNAL_SERVER_ERROR
+	        );
+	    }
 	}
+	
+	
+	
+	
 
 	@PostMapping("/postcourseimage/{id}")
 	public ResponseEntity<String> addimage(@RequestParam("image") MultipartFile image, @PathVariable Long id)
 			throws IOException {
 		ser.postImage(image, id);
 		return ResponseEntity.ok("image uploaded successfully...");
+	}
+
+	@DeleteMapping("/deletecourseimage/{courseId}")
+	public ResponseEntity<String> deletecourseimage(@PathVariable Long courseId) throws IOException {
+		ser.deleteImageByCourseId(courseId);
+		return ResponseEntity.ok("image deleted successfully...");
+	}
+
+	@PutMapping("/updatecourseimage/{courseId}")
+	public ResponseEntity<String> updatecourseimage(@RequestParam("image") MultipartFile image,
+			@PathVariable Long courseId) throws IOException {
+		ser.updateImage(image, courseId);
+		return ResponseEntity.ok("image updated successfully...");
 	}
 
 	@PostMapping("/postvideo/{id}")
@@ -232,6 +257,17 @@ public class AdminController {
 
 		return ResponseEntity.ok("Exam deleted successfully");
 	}
-	
 
+	@DeleteMapping("/deletevideo/{id}")
+	public ResponseEntity<String> deletevideo(@PathVariable int id) throws IOException {
+		vs.deleteVideo(id);
+		return ResponseEntity.ok("video deleted successfully...");
+	}
+
+	@PutMapping("/updatevideo/{id}")
+	public ResponseEntity<String> updatevideo(@PathVariable int id, @RequestParam("video") MultipartFile video)
+			throws IOException {
+		vs.updateVideo(id, video);
+		return ResponseEntity.ok("video updated successfully...");
+	}
 }

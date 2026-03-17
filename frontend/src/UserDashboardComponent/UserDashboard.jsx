@@ -43,6 +43,7 @@ const UserDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [userName, setUserName] = useState("");
   const [showNotification, setShowNotification] = useState(false);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
 
 
   const [showChat, setShowChat] = useState(false);
@@ -69,6 +70,19 @@ const UserDashboard = () => {
           console.error("Error fetching profile for greeting:", err);
           setUserName("User");
         });
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      BaseUrl.get("/mypaymentuser", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => {
+          const courses = res.data.map(item => item.course);
+          setEnrolledCourses(courses);
+        })
+        .catch(err => console.error("Error fetching enrolled courses:", err));
     }
   }, [token]);
 
@@ -100,6 +114,38 @@ const UserDashboard = () => {
       <div className="body">
 
         <CarouselImages userName={userName} />
+
+        {enrolledCourses.length > 0 && (
+          <div className="continue-watching-container">
+            <div className="continue-watching-section">
+              <div className="cw-header">
+                <h3>Continue Watching</h3>
+                <span className="cw-tag">In Progress</span>
+              </div>
+              <div className="cw-card" onClick={() => navigate(`/SingleCourse/${enrolledCourses[0].id}`)}>
+                <div className="cw-img-wrapper">
+                  <img 
+                    src={`${BaseUrl.defaults.baseURL}/getimage/${enrolledCourses[0].id}`} 
+                    alt={enrolledCourses[0].title} 
+                    onError={(e) => {
+                      e.target.src = upgrade;
+                    }}
+                  />
+                  <div className="cw-play-overlay">
+                    <div className="play-icon-box">▶</div>
+                  </div>
+                </div>
+                <div className="cw-details">
+                  <h4>{enrolledCourses[0].title}</h4>
+                  <p>{enrolledCourses[0].category || "Professional Course"}</p>
+                  <button className="cw-btn">
+                    Resume Learning
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
 
 

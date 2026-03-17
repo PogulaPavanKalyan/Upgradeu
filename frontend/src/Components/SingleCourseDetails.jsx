@@ -96,6 +96,7 @@ const SingleCourseDetails = () => {
   // Buy course
   const buyCourse = async () => {
     if (!token) {
+      alert("Please log in to continue with your purchase.");
       navigate("/login");
       return;
     }
@@ -116,6 +117,7 @@ const SingleCourseDetails = () => {
   // Add to Cart
   const handleAddToCart = async (id) => {
     if (!token) {
+      alert("Please log in to add this course to your cart.");
       navigate("/login");
       return;
     }
@@ -203,7 +205,7 @@ const SingleCourseDetails = () => {
             </div>
 
             <div className="col-lg-3">
-              <div className="buy-card sticky-top">
+              <div className="buy-card ">
                 <div className="thumbnail-wrapper">
                   <img src={imageUrl || "https://via.placeholder.com/600x400"} alt={course.title} />
                   <span className="preview-badge">Preview this course</span>

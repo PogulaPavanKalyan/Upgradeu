@@ -16,6 +16,8 @@ import {
   ChevronRight,
   Info,
   ClipboardList,
+  X,
+  UploadCloud,
   Image as ImageIcon
 } from "lucide-react";
 import "../AdminStyles/AdminCourseDetails.css";
@@ -125,6 +127,40 @@ const AdminCourseDetails = () => {
       if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
     };
   }, [currentVideo, token]);
+  /* ================= DELETE IMAGE ================= */
+  const handleDeleteImage = async () => {
+    if (!window.confirm("Are you sure you want to delete the course image?")) return;
+
+    try {
+      await BaseUrl.delete(`/admin/deletecourseimage/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Image deleted successfully");
+      setImageUrl(null);
+    } catch (err) {
+      console.error("Failed to delete image", err);
+      alert("Failed to delete image");
+    }
+  };
+
+  const handleDeleteVideo = async (videoId) => {
+    if (!window.confirm("Are you sure you want to delete this video lesson?")) return;
+    try {
+      await BaseUrl.delete(`/admin/deletevideo/${videoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Refresh video list
+      const updatedVideos = videos.filter(v => v.videoId !== videoId);
+      setVideos(updatedVideos);
+      if (currentVideo?.videoId === videoId) {
+        setCurrentVideo(updatedVideos[0] || null);
+      }
+      alert("Video deleted successfully!");
+    } catch (error) {
+      console.error("Delete video error:", error);
+      alert("Failed to delete video.");
+    }
+  };
 
   if (loading) return (
     <div className="course-details-status">
@@ -188,11 +224,18 @@ const AdminCourseDetails = () => {
 
           <div className="hero-media">
             {imageUrl ? (
-              <img src={imageUrl} alt={course.course_Name} className="course-feature-img" />
+              <div className="media-container">
+                <img src={imageUrl} alt={course.course_Name} className="course-feature-img" />
+                <div className="media-actions-overlay">
+                   <button className="media-btn delete" onClick={handleDeleteImage}>Delete Image</button>
+                   <button className="media-btn update" onClick={() => navigate(`/postCourseimage/${id}`)}>Update Image</button>
+                </div>
+              </div>
             ) : (
               <div className="img-placeholder">
                 <ImageIcon size={48} />
                 <span>No Course Image</span>
+                <button className="secondary-btn mt-2" onClick={() => navigate(`/postCourseimage/${id}`)}>Upload Image</button>
               </div>
             )}
           </div>
@@ -241,17 +284,39 @@ const AdminCourseDetails = () => {
                           <span className="play-label">Lesson {index + 1}</span>
                           <div className="playlist-actions">
                             <span className="play-status">{currentVideo?.videoId === v.videoId ? "Playing..." : "Available"}</span>
-                            <button
-                              className="view-exam-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/AdminViewExam/${v.videoId}`);
-                              }}
-                              title="View Exam"
-                            >
-                              <ClipboardList size={14} />
-                              <span>View Exam</span>
-                            </button>
+                            <div className="action-button-group">
+                              <button
+                                className="action-icon-btn delete-v"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteVideo(v.videoId);
+                                }}
+                                title="Delete Video"
+                              >
+                                <X size={14} />
+                              </button>
+                              <button
+                                className="action-icon-btn update-v"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/updatevideo/${v.videoId}`);
+                                }}
+                                title="Update Video"
+                              >
+                                <UploadCloud size={14} />
+                              </button>
+                              <button
+                                className="view-exam-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/AdminViewExam/${v.videoId}`);
+                                }}
+                                title="View Exam"
+                              >
+                                <ClipboardList size={14} />
+                                <span>Exam</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                         {currentVideo?.videoId === v.videoId && <PlayCircle size={16} className="active-icon" />}

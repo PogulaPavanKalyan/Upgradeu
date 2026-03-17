@@ -19,4 +19,16 @@ BaseUrl.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ✅ Response Interceptor for handling 401 errors
+BaseUrl.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      // Optional: window.location.href = "/login"; // Force redirect if needed
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default BaseUrl;

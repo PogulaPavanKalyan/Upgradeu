@@ -16,11 +16,9 @@ const GetBlogList = () => {
 
   const fetchBlogs = async () => {
     try {
-      // 1️⃣ Fetch blog list (JSON only)
+      // 1️⃣ Fetch blog list
       const blogRes = await BaseUrl.get("/getbloglist", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       const blogList = blogRes.data;
@@ -32,10 +30,8 @@ const GetBlogList = () => {
             const imageRes = await BaseUrl.get(
               `/getblogimage/${blog.id}`,
               {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-                responseType: "blob", // IMPORTANT
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                responseType: "blob",
               }
             );
 

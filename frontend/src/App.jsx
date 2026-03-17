@@ -35,6 +35,7 @@ import AdminCourses from './AdminComponent/AdminCourses';
 import EditCourse from './AdminComponent/EditCourse';
 import PostCourseImage from './AdminComponent/PostCourseImage';
 import AdminCourseDetails from './AdminComponent/AdminCourseDetails';
+import UpdateVideo from './AdminComponent/UpdateVideo';
 import RegisterUser from './AdminComponent/RegisterUser';
 import SingleUserDetails from './AdminComponent/SingleUserDetails';
 
@@ -110,7 +111,7 @@ function App() {
             <Route path='/' element={<UserDashboard />} />
             <Route path='/Aboutus' element={<Aboutus />} />
 
-            <Route path='/GetBlogs' element={<ProtectedRoute allowedRole="STUDENT"><GetBlogList /></ProtectedRoute>} />
+            <Route path='/GetBlogs' element={<GetBlogList />} />
             <Route path='/termsofuses' element={<Termsofuses />} />
             <Route path='/Shipping' element={<Shipping />} />
             <Route path='/RefundPolicy' element={<RefundPolicy />} />
@@ -180,6 +181,7 @@ function App() {
             <Route path='registeruser' element={<RegisterUser />} />
             <Route path='/singleuserdetails/:id' element={<SingleUserDetails />} />
             <Route path='/admincoursedetails/:id' element={<AdminCourseDetails />} />
+            <Route path='/updatevideo/:videoId' element={<UpdateVideo />} />
             <Route path="/registeradmin" element={<RegisterAdmin />} />
             <Route path='/editcourses/:id' element={<EditCourse />} />
             <Route path='paymentDetails' element={<AdminPaymentDetails />} />

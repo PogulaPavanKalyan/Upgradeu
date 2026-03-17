@@ -1,6 +1,5 @@
 package com.UpgradeU.Service;
 
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -11,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -23,10 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.UpgradeU.Dto.VideoResponse;
 import com.UpgradeU.Entity.Course;
 import com.UpgradeU.Entity.VideoEntity;
-
 import com.UpgradeU.Repo.CourseRepo;
 import com.UpgradeU.Repo.VideoRepo;
-
 
 @Service
 public class VideoService {
@@ -108,10 +102,40 @@ public class VideoService {
 		
 		return respo;
 	}
-	
-	
 
-	
-	
-	
+	public void deleteVideo(int id) throws IOException {
+		VideoEntity v = videorepo.findById(id).orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+		Path p = Paths.get(v.getVideoPath());
+		if (Files.exists(p)) {
+			Files.delete(p);
+		}
+		videorepo.deleteById(id);
+	}
+
+	public String updateVideo(int id, MultipartFile video) throws IOException {
+		VideoEntity i = videorepo.findById(id).orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+		
+		// Delete old file
+		Path oldP = Paths.get(i.getVideoPath());
+		if (Files.exists(oldP)) {
+			Files.delete(oldP);
+		}
+
+		// Save new file
+		Path uploadpath = Paths.get(dir + i.getCourse().getId());
+		if (!Files.exists(uploadpath)) {
+			Files.createDirectories(uploadpath);
+		}
+
+		String iname = System.currentTimeMillis() + "_" + video.getOriginalFilename();
+		Path ipath = uploadpath.resolve(iname);
+		Files.copy(video.getInputStream(), ipath, StandardCopyOption.REPLACE_EXISTING);
+
+		// Update entity
+		i.setVideoPath(ipath.toString());
+		i.setVideoType(video.getContentType());
+		videorepo.save(i);
+
+		return "Update success";
+	}
 }

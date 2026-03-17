@@ -61,14 +61,19 @@ const Footer = () => {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
               </a>
             </div>
-            {/* Newsletter */}
-            {/* <form className="pf-newsletter" onSubmit={handleSubscribe}>
-              <label className="pf-nl-label">Newsletter</label>
-              <div className="pf-nl-row">
-                <input type="email" className="pf-nl-input" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required />
-                <button type="submit" className="pf-nl-btn">Subscribe</button>
+
+            {/* App Store Badges */}
+            <div className="pf-app-badges">
+              <span className="pf-heading-sm">Get our Mobile App</span>
+              <div className="pf-badge-row">
+                <a href="#playstore" className="pf-app-link">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="app-badge-img" />
+                </a>
+                <a href="#appstore" className="pf-app-link">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="app-badge-img" />
+                </a>
               </div>
-            </form> */}
+            </div>
           </div>
 
           {/* ── Platform ── */}
@@ -106,10 +111,6 @@ const Footer = () => {
               <li onClick={() => navigate("/accessibility")}>Accessibility</li>
               <li onClick={() => navigate("/sitemap")}>Sitemap</li>
             </ul>
-            <div className="pf-badges">
-              <span>🔒 SSL Secured</span>
-              <span>✅ ISO Certified</span>
-            </div>
           </div>
 
         </div>

@@ -260,3 +260,55 @@
 .footer-section {
     color: #ffffff;
 }
+
+/* ── App Badges ── */
+.pf-app-badges {
+  margin-top: 12px;
+}
+
+.pf-heading-sm {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.pf-badge-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pf-app-link {
+  display: block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pf-app-link:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.app-badge-img {
+  height: 38px;
+  width: auto;
+  display: block;
+  border-radius: 6px;
+  filter: brightness(0.9) contrast(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pf-app-link:hover .app-badge-img {
+  filter: brightness(1.1) contrast(1.2);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.2);
+}
+
+@media (max-width: 640px) {
+  .pf-badge-row {
+    justify-content: flex-start;
+  }
+}

@@ -45,7 +45,8 @@
 /* ── Thumbnail ── */
 .cc-thumb {
   position: relative;
-  height: 210px;
+  aspect-ratio: 16 / 10; /* Better aspect ratio for course cards */
+  height: auto;
   background: #1e2642;
   overflow: hidden;
   flex-shrink: 0;
@@ -54,12 +55,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center; /* Center centering is usually better for wide range of images */
   display: block;
   transition: transform 0.4s ease;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  -ms-interpolation-mode: bicubic;
 }
 
 .cc-card:hover .cc-thumb-img {

@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.UpgradeU.Entity.Course;
+import com.UpgradeU.Entity.VideoEntity;
 import com.UpgradeU.Repo.CourseRepo;
+import com.UpgradeU.Repo.VideoRepo;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class courseService {
@@ -14,6 +19,8 @@ public class courseService {
 	@Autowired
 	private CourseRepo repo;
 	
+	@Autowired
+	private VideoRepo ve;
 	
 
 	public Course addCourse(Course course) {
@@ -56,7 +63,30 @@ public class courseService {
 			 return repo.save(i);
 		 }
 	
-	public void deleteCourse(Long courseId) {
-		repo.deleteById(courseId);
+
+	    @Transactional
+	    public void deleteCourse(Long courseId) {
+	        if (!repo.existsById(courseId)) {
+	            throw new EntityNotFoundException("Course not found with id: " + courseId);
+	        }
+
+	        List<VideoEntity> videos = ve.findByCourseId(courseId);
+	        for (VideoEntity video : videos) {
+	            ve.deleteById(video.getId());
+	        }
+	        
+	        
+	        
+	        // 👇 Uncomment whichever tables exist in your DB
+//	         enrollmentRepo.deleteByCourseId(courseId);
+//	         moduleRepo.deleteByCourseId(courseId);
+//       lessonRepo.deleteByCourseId(courseId);
+//	         quizRepo.deleteByCourseId(courseId);
+//	         progressRepo.deleteByCourseId(courseId);
+//	         reviewRepo.deleteByCourseId(courseId);
+//	         cartRepo.deleteByCourseId(courseId);
+//	         orderRepo.deleteByCourseId(courseId);
+
+	        repo.deleteById(courseId);
+	    }
 	}
-}

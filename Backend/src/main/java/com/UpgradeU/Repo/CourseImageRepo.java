@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.UpgradeU.Entity.CourseImageEntity;
 
 
-public interface CourseImageRepo  extends JpaRepository<CourseImageEntity, Integer>{
+import java.util.Optional;
 
+public interface CourseImageRepo  extends JpaRepository<CourseImageEntity, Integer>{
+    Optional<CourseImageEntity> findByCourseId(Long courseId);
 }

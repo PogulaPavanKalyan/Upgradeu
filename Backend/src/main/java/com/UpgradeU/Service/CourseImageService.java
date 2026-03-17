@@ -36,45 +36,80 @@ public class CourseImageService {
 	@Autowired
 	private CourseRepo cr;
 	
-	public String postImage(MultipartFile image,Long id)throws IOException
-	{
-		Path uploadpath=Paths.get(dir);
-		
-		if(!Files.exists(uploadpath))
-		{
+	public String postImage(MultipartFile image, Long id) throws IOException {
+		Path uploadpath = Paths.get(dir);
+
+		if (!Files.exists(uploadpath)) {
 			Files.createDirectories(uploadpath);
 		}
-		String iname=image.getOriginalFilename();
-		Path ipath=uploadpath.resolve(iname);
-		
-		Files.copy(image.getInputStream(),ipath,StandardCopyOption.REPLACE_EXISTING);
-		Course c=cr.findById(id).orElseThrow();
-		CourseImageEntity i=new CourseImageEntity();
+		String iname = id + "_" + System.currentTimeMillis() + "_" + image.getOriginalFilename();
+		Path ipath = uploadpath.resolve(iname);
+
+		Files.copy(image.getInputStream(), ipath, StandardCopyOption.REPLACE_EXISTING);
+		Course c = cr.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
+
+		// Check if image record already exists for this course
+		CourseImageEntity i = imrepo.findByCourseId(id).orElse(new CourseImageEntity());
 		i.setCourse(c);
-		
-		
 		i.setImage_name(iname);
 		i.setImage_path(ipath.toString());
 		i.setImage_type(image.getContentType());
 		imrepo.save(i);
-		
+
 		return "success....";
-		
 	}
 	
 	
 	
-	public Resource getImage(int id)throws MalformedURLException
-	{
-		CourseImageEntity i=imrepo.findById(id).orElseThrow();
-		
-		Path p=Paths.get(i.getImage_path());
-		Resource r=new UrlResource(p.toUri());
-		
+	public Resource getImage(Long courseId) throws MalformedURLException {
+		CourseImageEntity i = imrepo.findByCourseId(courseId)
+				.orElseThrow(() -> new RuntimeException("Image not found for course id: " + courseId));
+
+		Path p = Paths.get(i.getImage_path());
+		if (!Files.exists(p)) {
+			throw new RuntimeException("Image file not found at path: " + i.getImage_path());
+		}
+		Resource r = new UrlResource(p.toUri());
+
 		return r;
 	}
 
 
 
-	
+	public void deleteImageByCourseId(Long courseId) throws IOException {
+		CourseImageEntity i = imrepo.findByCourseId(courseId)
+				.orElseThrow(() -> new RuntimeException("Image not found for course id: " + courseId));
+
+		Path p = Paths.get(i.getImage_path());
+		Files.deleteIfExists(p);
+		imrepo.delete(i);
+	}
+
+	public String updateImage(MultipartFile image, Long courseId) throws IOException {
+		CourseImageEntity i = imrepo.findByCourseId(courseId).orElse(null);
+
+		if (i != null) {
+			// Delete old file
+			Files.deleteIfExists(Paths.get(i.getImage_path()));
+		} else {
+			// If somehow entity doesn't exist, create one linked to course
+			Course c = cr.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+			i = new CourseImageEntity();
+			i.setCourse(c);
+		}
+
+		Path uploadpath = Paths.get(dir);
+		String iname = courseId + "_" + System.currentTimeMillis() + "_" + image.getOriginalFilename();
+		Path ipath = uploadpath.resolve(iname);
+
+		Files.copy(image.getInputStream(), ipath, StandardCopyOption.REPLACE_EXISTING);
+
+		i.setImage_name(iname);
+		i.setImage_path(ipath.toString());
+		i.setImage_type(image.getContentType());
+		imrepo.save(i);
+
+		return "Update success";
+	}
+
 }

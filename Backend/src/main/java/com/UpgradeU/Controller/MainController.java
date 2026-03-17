@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +18,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import java.net.MalformedURLException;
 
 import com.UpgradeU.Dto.ExamResponse;
@@ -296,13 +292,18 @@ public class MainController {
 	}
 
 	@GetMapping("/getimage/{id}")
-	public ResponseEntity<Resource> get(@PathVariable int id) throws MalformedURLException {
-		var a = ser.getImage(id);
-		CourseImageEntity i = re.findById(id).orElseThrow();
-
-		var t = i.getImage_type();
-		return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.CONTENT_TYPE, t).body(a);
-
+	public ResponseEntity<Resource> get(@PathVariable Long id) {
+		try {
+			Resource a = ser.getImage(id);
+			CourseImageEntity i = re.findByCourseId(id).orElseThrow();
+			var t = i.getImage_type();
+			return ResponseEntity.status(HttpStatus.OK)
+					.header(HttpHeaders.CONTENT_TYPE, t)
+					.body(a);
+		} catch (Exception e) {
+			System.err.println("Image fetch failed for course " + id + ": " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
 	}
 
 	@GetMapping("courseVideoList/{id}")
@@ -312,27 +313,22 @@ public class MainController {
 	}
 
 	@GetMapping("getvideo/{id}")
-	public ResponseEntity<ResourceRegion> get1(@PathVariable int id, @RequestHeader HttpHeaders headers) throws IOException {
-		Resource video = vs.getvideo(id);
-		VideoEntity v = ve.findById(id).orElseThrow();
+	public ResponseEntity<Resource> getVideo(@PathVariable int id) {
+		try {
+			Resource video = vs.getvideo(id);
+			VideoEntity v = ve.findById(id).orElseThrow();
 
-		long contentLength = video.contentLength();
-		HttpRange range = headers.getRange().isEmpty() ? null : headers.getRange().get(0);
+			if (!video.exists()) {
+				throw new RuntimeException("Video file missing for id: " + id);
+			}
 
-		ResourceRegion region;
-		if (range != null) {
-			long start = range.getRangeStart(contentLength);
-			long end = range.getRangeEnd(contentLength);
-			long rangeLength = Math.min(1024 * 1024, end - start + 1); // 1MB chunks for fast load
-			region = new ResourceRegion(video, start, rangeLength);
-		} else {
-			long rangeLength = Math.min(1024 * 1024, contentLength);
-			region = new ResourceRegion(video, 0, rangeLength);
+			return ResponseEntity.status(HttpStatus.OK)
+					.contentType(MediaType.parseMediaType(v.getVideoType() != null ? v.getVideoType() : "video/mp4"))
+					.body(video);
+		} catch (Exception e) {
+			System.err.println("Video fetch failed for id " + id + ": " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
-
-		return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-				.contentType(MediaType.parseMediaType(v.getVideoType() != null ? v.getVideoType() : "video/mp4"))
-				.body(region);
 	}
 
 	@GetMapping("/profile")

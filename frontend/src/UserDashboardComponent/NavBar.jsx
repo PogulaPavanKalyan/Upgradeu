@@ -42,12 +42,18 @@ const NavBar = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      BaseUrl.get("/getcart", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+    const storedToken = localStorage.getItem("token");
+    if (storedToken && storedToken.split(".").length === 3) {
+      BaseUrl.get("/getcart")
         .then(res => setCartCount(res.data.length))
-        .catch(err => console.error("Nav cart fetch error:", err));
+        .catch(err => {
+          if (err.response && err.response.status === 401) {
+            setCartCount(0);
+          }
+          console.error("Nav cart fetch error:", err);
+        });
+    } else {
+      setCartCount(0);
     }
   }, [token, location.pathname]);
 

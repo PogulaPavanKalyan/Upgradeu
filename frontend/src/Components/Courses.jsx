@@ -7,7 +7,6 @@ import BaseUrl from "./BaseUrl";
 const Courses = () => {
   const { token } = useAuth();
   const [courses, setCourses] = useState([]);
-  const [images, setImages] = useState({}); // ✅ store courseId -> imageURL
   const nav = useNavigate();
   const { keyword } = useParams();
 
@@ -26,7 +25,6 @@ const Courses = () => {
         const coursesRes = await BaseUrl.get(url, { headers });
         const allCourses = coursesRes.data;
         setCourses(allCourses);
-        loadImages(allCourses);
 
         // Fetch Enrolled Courses if logged in
         if (token) {
@@ -46,40 +44,6 @@ const Courses = () => {
 
     fetchData();
   }, [token, keyword]);
-
-  /* ================= FETCH COURSE IMAGE ================= */
-  const loadImages = async (courseList) => {
-    const imageMap = {};
-
-    await Promise.all(
-      courseList.map(async (course) => {
-        try {
-          const headers = {};
-          if (token) {
-            headers.Authorization = `Bearer ${token}`;
-          }
-
-          const res = await BaseUrl.get(`/getimage/${course.id}`, {
-            headers,
-            responseType: "blob",
-          });
-
-          imageMap[course.id] = URL.createObjectURL(res.data);
-        } catch (err) {
-          console.error("Image load failed for course:", course.id);
-        }
-      })
-    );
-
-    setImages(imageMap);
-  };
-
-  /* ================= CLEANUP IMAGE URLS ================= */
-  useEffect(() => {
-    return () => {
-      Object.values(images).forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [images]);
 
   return (
     <>
@@ -104,9 +68,12 @@ const Courses = () => {
                 {/* ── Thumbnail ── */}
                 <div className="cc-thumb">
                   <img
-                    src={images[course.id] || "/course-placeholder.png"}
+                    src={`${BaseUrl.defaults.baseURL}/getimage/${course.id}`}
                     alt={course.title}
                     className="cc-thumb-img"
+                    onError={(e) => {
+                      e.target.src = "/course-placeholder.png";
+                    }}
                   />
                   {/* Dark gradient overlay with category label */}
                   <div className="cc-thumb-overlay">

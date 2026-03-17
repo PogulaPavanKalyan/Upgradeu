@@ -9,7 +9,7 @@ import "../Styles/CourseListing.css";
 
 // Extracted CourseCard Component
 
-const CourseCard = ({ course, badge, images, navigate }) => (
+const CourseCard = ({ course, badge, navigate }) => (
   <div
     className="course-card"
     onClick={() => {
@@ -24,10 +24,13 @@ const CourseCard = ({ course, badge, images, navigate }) => (
     {badge && <div className={`course-badge ${badge.type}`}>{badge.text}</div>}
 
     <img
-      src={images[course.id] || fallbackImg}
+      src={`${BaseUrl.defaults.baseURL}/getimage/${course.id}`}
       className="course-img"
       alt={course.title}
       draggable="false"
+      onError={(e) => {
+        e.target.src = fallbackImg;
+      }}
     />
 
     <div className="course-name-strip">
@@ -69,7 +72,7 @@ const CourseCard = ({ course, badge, images, navigate }) => (
 );
 
 // Extracted CourseSection Component with Auto-Scroll Logic
-const CourseSection = ({ title, icon, courses, badgeType, layout = "grid", enableAutoScroll = false, images, navigate }) => {
+const CourseSection = ({ title, icon, courses, badgeType, layout = "grid", enableAutoScroll = false, navigate }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -124,7 +127,6 @@ const CourseSection = ({ title, icon, courses, badgeType, layout = "grid", enabl
             key={course.id}
             course={course}
             badge={badgeType ? { type: badgeType, text: badgeType === 'featured' ? 'Featured' : badgeType === 'trending' ? 'Trending' : 'Top Rated' } : null}
-            images={images}
             navigate={navigate}
           />
         ))}
@@ -138,7 +140,6 @@ const CourseListings = () => {
   const { token } = useAuth();
 
   const [courses, setCourses] = useState([]);
-  const [images, setImages] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,33 +175,6 @@ const CourseListings = () => {
     fetchData();
   }, [token]);
 
-  useEffect(() => {
-    if (courses.length === 0) return;
-
-    const loadImages = async () => {
-      const map = {};
-      for (const c of courses) {
-        try {
-          const headers = {};
-          if (token) {
-            headers.Authorization = `Bearer ${token}`;
-          }
-
-          const res = await BaseUrl.get(`/getimage/${c.id}`, {
-            headers,
-            responseType: "blob",
-          });
-          map[c.id] = URL.createObjectURL(res.data);
-        } catch {
-          map[c.id] = fallbackImg;
-        }
-      }
-      setImages(map);
-    };
-
-    loadImages();
-  }, [courses, token]);
-
   // Filter courses by category/criteria
   const featuredCourses = courses.slice(0, 4);
   const topRatedCourses = courses
@@ -224,7 +198,6 @@ const CourseListings = () => {
         courses={featuredCourses}
         badgeType="featured"
         layout="stack"
-        images={images}
         navigate={navigate}
       />
 
@@ -236,7 +209,6 @@ const CourseListings = () => {
         badgeType="top-rated"
         layout="carousel"
         enableAutoScroll={true}
-        images={images}
         navigate={navigate}
       />
 
@@ -248,7 +220,6 @@ const CourseListings = () => {
         badgeType="trending"
         layout="carousel"
         enableAutoScroll={true}
-        images={images}
         navigate={navigate}
       />
 
@@ -259,7 +230,6 @@ const CourseListings = () => {
           courses={courses.slice(0, 6)}
           layout="carousel"
           enableAutoScroll={true}
-          images={images}
           navigate={navigate}
         />
       )}
