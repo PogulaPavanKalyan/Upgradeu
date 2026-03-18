@@ -1,35 +1,44 @@
 import React, { useEffect, useRef } from "react";
 import "../Styles/SuccessStories.css";
 
+import gopiProfile from "../assets/SuccessImages/gopi.jpeg";
+import rrtrainingLogo from "../assets/SuccessImages/rrtraining.png";
+import lokeshProfile from "../assets/SuccessImages/lokesh.jpg";
+import wiproLogo from "../assets/SuccessImages/wipro.jpg";
+import maheshProfile from "../assets/SuccessImages/mahesh.jpg";
+import hclLogo from "../assets/SuccessImages/hcl.jpg";
+import ramuProfile from "../assets/SuccessImages/ramu.jpg";
+import infosysLogo from "../assets/SuccessImages/infosys.jpeg";
+
 const data = [
   {
     name: "venkata Gopi Pathi",
-    profile: "/SuccessImages/gopi.jpeg",
-    company: "/SuccessImages/rrtraining.png",
+    profile: gopiProfile,
+    company: rrtrainingLogo,
     before: "Python Automation",
     after: "system Engineer",
     bg: "blue"
   },
   {
     name: "lokesh Reddy Ogirala",
-    profile: "/SuccessImages/lokesh.jpg",
-    company: "/SuccessImages/wipro.jpg",
+    profile: lokeshProfile,
+    company: wiproLogo,
     before: "Fresher",
     after: "Software Developer",
     bg: "yellow"
   },
   {
     name: "Mahesh  Vennapusala",
-    profile: "/SuccessImages/mahesh.jpg",
-    company: "/SuccessImages/hcl.jpg",
+    profile: maheshProfile,
+    company: hclLogo,
     before: "python Intern",
     after: "Python developer",
     bg: "pink"
   },
   {
     name: "Ramu Bhuvanaboina",
-    profile: "/SuccessImages/ramu.jpg",
-    company: "/SuccessImages/infosys.jpeg",
+    profile: ramuProfile,
+    company: infosysLogo,
     before: "System Engineer",
     after: "Associate Consultant",
     bg: "purple"

@@ -82,7 +82,9 @@
 
 /* ================= COMPANY LOGO ================= */
 .company {
+  display: block;
   max-width: 110px;
+  height: auto;
   margin: 16px auto;
 }
 
