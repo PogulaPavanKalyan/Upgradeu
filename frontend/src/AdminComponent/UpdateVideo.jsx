@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BaseUrl from "../Components/BaseUrl";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import { UploadCloud, CheckCircle2, ArrowLeft, Video } from "lucide-react";
 import "../AdminStyles/Videos.css";
 
 const UpdateVideo = () => {
     const { videoId } = useParams();
     const { token } = useAuth();
+    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const [video, setVideo] = useState(null);
@@ -28,7 +30,7 @@ const UpdateVideo = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!video) {
-            setMessage("Please select a video file first.");
+            showToast("Please select a video file first.", "warning");
             return;
         }
 
@@ -43,10 +45,11 @@ const UpdateVideo = () => {
                     Authorization: `Bearer ${token}`
                 },
             });
+            showToast("Video updated successfully!", "success");
             setShowSuccess(true);
         } catch (error) {
             console.error("Update video error:", error);
-            setMessage(error.response?.data || "Failed to update video.");
+            showToast(error.response?.data || "Failed to update video.", "error");
         } finally {
             setIsUploading(false);
         }

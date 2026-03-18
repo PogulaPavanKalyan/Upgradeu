@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BaseUrl from "../Components/BaseUrl";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import {
   CheckCircle2,
   HelpCircle,
@@ -15,6 +16,7 @@ import "../AdminStyles/Videos.css";
 
 const Videos = () => {
   const { token } = useAuth();
+  const { showToast } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -63,17 +65,17 @@ const Videos = () => {
   const uploadAll = async (e) => {
     e.preventDefault();
     if (!id) {
-      setMessage("Invalid course context.");
+      showToast("Invalid course context.", "error");
       return;
     }
     if (!previews.length) {
-      setMessage("Please select at least one video.");
+      showToast("Please select at least one video.", "warning");
       return;
     }
 
     // Safety check: Don't upload if still processing metadata
     if (isProcessingMetadata) {
-      setMessage("Please wait for all videos to finish processing.");
+      showToast("Please wait for all videos to finish processing.", "info");
       return;
     }
 
@@ -98,7 +100,7 @@ const Videos = () => {
       setShowSuccessModal(true);
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.error || "Upload failed";
-      setMessage(msg);
+      showToast(msg, "error");
     } finally {
       setIsUploading(false);
     }

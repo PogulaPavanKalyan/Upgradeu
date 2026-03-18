@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.UpgradeU.Repo.StudentVideoProgressRepo;
+
 import org.springframework.stereotype.Service;
 
 import com.UpgradeU.Dto.ExamCreateRequest;
@@ -25,16 +27,20 @@ public class ExamService {
     private final ExamRepo examRepo;
     private final CourseRepo courseRepo;
     private final VideoRepo vr;
+    private final StudentVideoProgressRepo progressRepo;
     
     
 
     public ExamService(ExamRepo examRepo,
-                       CourseRepo courseRepo,
-                       VideoRepo vr) {
-        this.examRepo = examRepo;
-        this.courseRepo = courseRepo;
-        this.vr = vr;
-    }
+            CourseRepo courseRepo,
+            VideoRepo vr,
+            StudentVideoProgressRepo progressRepo) {
+
+this.examRepo = examRepo;
+this.courseRepo = courseRepo;
+this.vr = vr;
+this.progressRepo = progressRepo;
+}
 
     public Exam createExam(Long courseId,
             int videoId,
@@ -76,6 +82,7 @@ return examRepo.findByVideo_Id(videoId);
 
 
 public ExamResultResponse submitExam(Long examId,
+        Integer studentId,
         List<Integer> answers) {
 
 Exam exam = examRepo.findById(examId)
@@ -83,11 +90,12 @@ Exam exam = examRepo.findById(examId)
 
 List<Question> questions = exam.getQuestions();
 
-if (answers.size() != questions.size()) {  
+if (answers.size() != questions.size()) {
 throw new RuntimeException("All questions must be answered");
 }
 
 int correctCount = 0;
+
 for (int i = 0; i < questions.size(); i++) {
 if (questions.get(i).getCorrectOptionIndex() == answers.get(i)) {
 correctCount++;
@@ -97,16 +105,18 @@ correctCount++;
 int score = correctCount;
 boolean passed = score >= exam.getPassMarks();
 
-// Unlock next video if passed
 if (passed) {
-unlockNextVideo(exam.getVideo());
+unlockNextVideo(studentId, exam.getVideo());
 }
+
 
 return new ExamResultResponse(
-questions.size(), correctCount, score, passed
+questions.size(),
+correctCount,
+score,
+passed
 );
 }
-
 
 
 public ExamResponse getExamForStudentByVideoId(int videoId) {
@@ -135,11 +145,31 @@ public ExamResponse getExamForStudentByVideoId(int videoId) {
 
 
 
-private void unlockNextVideo(VideoEntity currentVideo) {
+private void unlockNextVideo(Integer studentId, VideoEntity currentVideo) {
 
-    System.out.println("Unlock next video process");
+    List<VideoEntity> videos =
+            vr.findByCourseIdOrderByIdAsc(currentVideo.getCourse().getId());
 
-    // later connect merged code here
+    for (int i = 0; i < videos.size(); i++) {
+
+        if (videos.get(i).getId() == currentVideo.getId()) {
+
+            if (i + 1 < videos.size()) {
+
+                VideoEntity nextVideo = videos.get(i + 1);
+
+                StudentVideoProgress progress =
+                        new StudentVideoProgress(studentId,
+                                (int)nextVideo.getId(),
+                                true,
+                                0.0);
+
+                progressRepo.save(progress);
+            }
+
+            break;
+        }
+    }
 }
 
 public void deleteExam(Long examId) {
@@ -150,6 +180,8 @@ public void deleteExam(Long examId) {
 
     examRepo.delete(exam);
 }
+
+
 
 
 

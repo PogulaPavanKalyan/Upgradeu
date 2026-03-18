@@ -6,10 +6,19 @@ public class ExamSubmitRequest {
 
     private Long examId;
     private Long userId;
+    private Long studentId;
     private List<Integer> answers;
 
     public Long getExamId() {
         return examId;
+    }
+    
+    public Long getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
     }
 
     public void setExamId(Long examId) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import {
   BookOpen,
@@ -22,6 +23,7 @@ import "../AdminStyles/AdminCourses.css";
 
 const AdminCourses = () => {
   const { token } = useAuth();
+  const { showToast, showConfirm } = useToast();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -65,16 +67,17 @@ const AdminCourses = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("⚠️ Are you sure you want to delete this course PERMANENTLY?")) return;
+    const confirmed = await showConfirm("Are you sure you want to delete this course PERMANENTLY?", "Confirm Course Deletion");
+    if (!confirmed) return;
     try {
       await BaseUrl.delete(`/admin/deletecourse/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("✅ Course deleted successfully");
+      showToast("Course deleted successfully", "success");
       fetchCourses();
     } catch (err) {
       console.error("Delete failed", err);
-      alert("❌ Failed to delete course");
+      showToast("Failed to delete course", "error");
     }
   };
 

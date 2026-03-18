@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import "../AdminStyles/EditCourse.css"
 
@@ -8,6 +9,7 @@ import "../AdminStyles/EditCourse.css"
 const EditCourse = () => {
   const { id } = useParams();
   const { token } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -62,11 +64,11 @@ const EditCourse = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Course updated successfully");
+      showToast("Course updated successfully", "success");
       navigate("/allcourses");
     } catch (err) {
       console.error("Update failed", err);
-      alert("Update failed");
+      showToast("Update failed", "error");
     } finally {
       setSaving(false);
     }

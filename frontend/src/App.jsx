@@ -89,16 +89,19 @@ import Sitemap from './UserDashboardComponent/Sitemap';
 
 
 import SecurityWrapper from './Components/SecurityWrapper';
+import { ToastProvider } from './Components/ToastContext';
 import RegisterAdmin from './AdminComponent/RegisterAdmin';
 import AdminAddExam from './AdminComponent/AdminAddExam';
 import AdminViewExam from './AdminComponent/AdminViewExam';
 import ViewAllActivity from './AdminComponent/ViewAllActivity';
+import StudentExam from './UserDashboardComponent/StudentExam';
 
 function App() {
   return (
     <BrowserRouter>
-      <SecurityWrapper>
-        <Routes>
+      <ToastProvider>
+        <SecurityWrapper>
+          <Routes>
           {/* Auth Routes WITHOUT Navbar and Footer */}
           <Route path='/login' element={<Login />} />
           <Route path='register' element={<Register />} />
@@ -129,6 +132,8 @@ function App() {
 
             <Route path="/Courses" element={<Courses />} />
             <Route path="/courses/:keyword" element={<Courses />} />
+            <Route path='/StudentExam/:videoId' element={<ProtectedRoute allowedRole="STUDENT"><StudentExam/></ProtectedRoute>} />
+
 
 
 
@@ -193,6 +198,7 @@ function App() {
           <Route path='protectedRoute' element={<ProtectedRoute />} />
         </Routes>
       </SecurityWrapper>
+     </ToastProvider>
     </BrowserRouter>
   )
 }

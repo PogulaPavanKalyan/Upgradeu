@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../Components/Authprovider";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import BaseUrl from "../Components/BaseUrl";
+import { useToast } from "../Components/ToastContext";
 import "../AdminStyles/PostCourseImage.css";
 
 const PostCourseImage = () => {
@@ -12,6 +13,7 @@ const PostCourseImage = () => {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 const navigate=useNavigate()
+const { showToast } = useToast();
 
   const [hasExistingImage, setHasExistingImage] = useState(false);
 
@@ -37,7 +39,7 @@ const navigate=useNavigate()
     e.preventDefault();
 
     if (!file) {
-      alert("Please select an image");
+      showToast("Please select an image", "warning");
       return;
     }
 
@@ -60,7 +62,7 @@ const navigate=useNavigate()
         },
       });
 
-      alert(hasExistingImage ? "Course image updated successfully" : "Course image uploaded successfully");
+      showToast(hasExistingImage ? "Course image updated successfully" : "Course image uploaded successfully", "success");
       navigate(-1)
       console.log(res.data);
       console.log("Course ID from URL:", id);
@@ -68,7 +70,7 @@ const navigate=useNavigate()
 
     } catch (err) {
       console.error(err);
-      alert("Image upload failed");
+      showToast("Image upload failed", "error");
       console.log("Course ID from URL:", id);
 
     } finally {

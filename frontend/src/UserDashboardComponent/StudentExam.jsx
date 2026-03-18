@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../Components/Authprovider";
 import BaseUrl from "../Components/BaseUrl";
@@ -8,19 +8,31 @@ const StudentExam = () => {
     const { videoId } = useParams();
     const { token } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [exam, setExam] = useState(null);
     const [answers, setAnswers] = useState({});
     const [result, setResult] = useState(null);
+    const [studentId, setStudentId] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // Terminal State
+    const isTerminalOnly = searchParams.get("terminal") === "true";
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+    const [language, setLanguage] = useState("python");
+    const [code, setCode] = useState("");
+    const [terminalOutput, setTerminalOutput] = useState("");
+    const [isExecuting, setIsExecuting] = useState(false);
 
     // Helpers
     const styles = {
         container: {
             display: 'flex',
-            minHeight: '100vh',
+            height: '100vh',           // Changed to fixed height
+            maxHeight: '100vh',        // Stop scrolling off-screen
+            overflow: 'hidden',        // Keep layout intact in window
             fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
             background: '#121212',
             color: '#e0e0e0'
@@ -38,10 +50,11 @@ const StudentExam = () => {
         main: {
             flex: 1,
             padding: '40px',
-            maxWidth: '1000px',
+            maxWidth: isTerminalOpen ? 'calc(100% - 320px - 450px)' : 'calc(100% - 320px)',
             margin: '0 auto',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            overflowY: 'auto'          // Allow scrolling only in main area
         },
         header: {
             display: 'flex',
@@ -101,6 +114,48 @@ const StudentExam = () => {
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        },
+        terminalContainer: {
+            width: isTerminalOpen ? '450px' : '0px',
+            background: '#1a1a1a',
+            borderLeft: isTerminalOpen ? '1px solid #333' : 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'width 0.3s ease',
+            overflow: 'hidden',
+            boxShadow: '-4px 0 15px rgba(0,0,0,0.5)',
+            zIndex: 20
+        },
+        terminalHeader: {
+            padding: '15px 20px',
+            background: '#252525',
+            borderBottom: '1px solid #333',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+        },
+        textarea: {
+            flex: 1,
+            background: '#1e1e1e',
+            color: '#d4d4d4',
+            fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+            padding: '15px',
+            border: 'none',
+            resize: 'none',
+            outline: 'none',
+            fontSize: '14px',
+            lineHeight: '1.5'
+        },
+        outputArea: {
+            height: '200px',
+            background: '#000',
+            color: '#a5d6a7',
+            padding: '15px',
+            fontFamily: 'Consolas, Monaco, monospace',
+            overflowY: 'auto',
+            borderTop: '1px solid #333',
+            fontSize: '13px',
+            whiteSpace: 'pre-wrap'
         }
     };
 
@@ -120,8 +175,112 @@ const StudentExam = () => {
                 setLoading(false);
             }
         };
-        fetchExam();
-    }, [videoId, token]);
+
+        const fetchProfile = async () => {
+            try {
+                const res = await BaseUrl.get("/profile", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setStudentId(res.data.id);
+            } catch (err) {
+                console.error("Profile fetch error:", err);
+            }
+        };
+
+        if (token) {
+            if (!isTerminalOnly) {
+                fetchExam();
+            } else {
+                setLoading(false);
+            }
+            fetchProfile();
+        }
+    }, [videoId, token, isTerminalOnly]);
+
+    // Terminal Execution Logic
+    // Judge0 CE API Language IDs
+    const JUDGE0_LANGUAGES = {
+        python: { id: 71 }, // Python 3
+        javascript: { id: 63 }, // Node.js
+        java: { id: 62 }, // Java
+        cpp: { id: 54 } // C++ (GCC)
+    };
+
+    const handleRunCode = async () => {
+        if (!code.trim()) {
+            setTerminalOutput("Error: No code to execute.");
+            return;
+        }
+
+        setIsExecuting(true);
+        setTerminalOutput("Executing...");
+
+        const langData = JUDGE0_LANGUAGES[language];
+
+        try {
+            // First request to submit code to Judge0
+            const response = await axios.post("https://ce.judge0.com/submissions", {
+                language_id: langData.id,
+                source_code: code
+            }, {
+                params: {
+                    base64_encoded: "false",
+                    fields: "*"
+                },
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const token = response.data.token;
+
+            // Polling for the result
+            const checkStatus = async () => {
+                const getResponse = await axios.get(`https://ce.judge0.com/submissions/${token}`, {
+                    params: {
+                        base64_encoded: "false",
+                        fields: "*"
+                    }
+                });
+
+                const status = getResponse.data.status.id;
+
+                // 1 = In Queue, 2 = Processing
+                if (status === 1 || status === 2) {
+                    setTimeout(checkStatus, 1000); // Check again in 1 second
+                } else {
+                    // Finished
+                    if (getResponse.data.stdout) {
+                        setTerminalOutput(getResponse.data.stdout);
+                    } else if (getResponse.data.stderr) {
+                        setTerminalOutput(getResponse.data.stderr);
+                    } else if (getResponse.data.compile_output) {
+                        setTerminalOutput(getResponse.data.compile_output);
+                    } else if (getResponse.data.message) {
+                        // Things like Internal Error / Time Limit Exceeded
+                        setTerminalOutput(`Error: ${getResponse.data.message}`);
+                    }
+                    setIsExecuting(false);
+
+                    // Mark terminal as used for this video to unlock next video
+                    const studentIdKey = localStorage.getItem("studentId") || token?.substring(0, 15) || "unknown";
+                    localStorage.setItem(`terminal_used_${studentIdKey}_${videoId}`, 'true');
+                }
+            };
+
+            await checkStatus();
+
+        } catch (err) {
+            console.error(err);
+            const errorMsg = err.response 
+                ? `Request failed with status code ${err.response.status}: ${err.response.data?.message || err.message}` 
+                : err.message;
+            
+            // Helpful message if Judge0 CE is down or rate-limited
+            setTerminalOutput(`Failed to connect to execution server.\nError: ${errorMsg}`);
+            setIsExecuting(false);
+        }
+    };
 
     const handleOptionSelect = (questionIndex, optionIndex) => {
         setAnswers({
@@ -170,7 +329,7 @@ const StudentExam = () => {
             // Updated Endpoint: /<examId>/submit based on MainController
             const res = await BaseUrl.post(
                 `/${examId}/submit`,
-                { answers: answersList },
+                { answers: answersList, studentId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             console.log("Submission Response:", res.data);
@@ -208,7 +367,69 @@ const StudentExam = () => {
         }
     };
 
+    const _studentIdForStorage = localStorage.getItem("studentId") || token?.substring(0, 15) || "unknown";
+
+    useEffect(() => {
+        if (result) {
+            if (result.passed) {
+                localStorage.setItem(`passed_exam_${_studentIdForStorage}_${videoId}`, 'true');
+                localStorage.removeItem(`failed_exam_${_studentIdForStorage}_${videoId}`);
+            } else {
+                localStorage.setItem(`failed_exam_${_studentIdForStorage}_${videoId}`, 'true');
+            }
+        }
+    }, [result, videoId, _studentIdForStorage]);
+
     if (loading) return <div style={{ padding: '20px', color: 'white', background: '#121212', minHeight: '100vh' }}>Loading Exam...</div>;
+
+    if (isTerminalOnly) {
+        return (
+            <div style={{ ...styles.container, flexDirection: 'column' }}>
+                <div style={{ padding: '20px', background: '#1e1e1e', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ color: 'white', margin: 0 }}>Practice Terminal</h2>
+                    <button onClick={() => navigate(-1)} style={{ ...styles.button, background: '#007bff', color: 'white' }}>Return to Course</button>
+                </div>
+                <div style={{ ...styles.terminalContainer, width: '100%', flex: 1, borderLeft: 'none', boxShadow: 'none' }}>
+                    <div style={styles.terminalHeader}>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 'bold', color: '#5da9f5' }}>Terminal</span>
+                            <select 
+                                value={language} 
+                                onChange={(e) => setLanguage(e.target.value)}
+                                style={{ background: '#333', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', outline: 'none' }}
+                            >
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                            </select>
+                        </div>
+                        <button 
+                            onClick={handleRunCode} 
+                            disabled={isExecuting}
+                            style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 15px', borderRadius: '4px', cursor: isExecuting ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+                        >
+                            {isExecuting ? 'Running...' : '▶ Run'}
+                        </button>
+                    </div>
+                    
+                    <textarea 
+                        style={styles.textarea}
+                        placeholder={`Write your ${language} code here...\n\nExample:\nprint("Hello World")`}
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        spellCheck={false}
+                    />
+                    
+                    <div style={{ ...styles.outputArea, flex: 'none', height: '35vh' }}>
+                        <div style={{ color: '#666', marginBottom: '8px' }}>--- Output ---</div>
+                        {terminalOutput}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (error) return <div style={{ padding: '20px', color: 'red', background: '#121212', minHeight: '100vh' }}>{error}</div>;
     if (!exam || !exam.questions) return <div style={{ padding: '20px', color: 'white', background: '#121212', minHeight: '100vh' }}>No questions found in this exam.</div>;
 
@@ -276,9 +497,14 @@ const StudentExam = () => {
             </div>
 
             {/* Main Area */}
-            <div style={styles.main}>
+            <div className="exam-main-panel" style={{ ...styles.main, paddingRight: isTerminalOpen ? '20px' : '40px' }}>
                 <div style={styles.header}>
-                    <div></div>
+                    <button 
+                        onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+                        style={{ ...styles.button, background: isTerminalOpen ? '#dc3545' : '#28a745', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        {isTerminalOpen ? '✖ Close Terminal' : '💻 Practice Terminal'}
+                    </button>
                     <div style={{ textAlign: 'right' }}>
                         <span style={{ fontSize: '0.9rem', color: '#888', display: 'block' }}>Question</span>
                         <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>
@@ -354,6 +580,45 @@ const StudentExam = () => {
                             Next
                         </button>
                     )}
+                </div>
+            </div>
+
+            {/* Terminal Slider */}
+            <div style={styles.terminalContainer}>
+                <div style={styles.terminalHeader}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 'bold', color: '#5da9f5' }}>Terminal</span>
+                        <select 
+                            value={language} 
+                            onChange={(e) => setLanguage(e.target.value)}
+                            style={{ background: '#333', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', outline: 'none' }}
+                        >
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <button 
+                        onClick={handleRunCode} 
+                        disabled={isExecuting}
+                        style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 15px', borderRadius: '4px', cursor: isExecuting ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+                    >
+                        {isExecuting ? 'Running...' : '▶ Run'}
+                    </button>
+                </div>
+                
+                <textarea 
+                    style={styles.textarea}
+                    placeholder={`Write your ${language} code here...\n\nExample:\nprint("Hello World")`}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    spellCheck={false}
+                />
+                
+                <div style={styles.outputArea}>
+                    <div style={{ color: '#666', marginBottom: '8px' }}>--- Output ---</div>
+                    {terminalOutput}
                 </div>
             </div>
         </div>

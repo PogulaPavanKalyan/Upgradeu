@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import {
   ArrowLeft,
@@ -25,6 +26,7 @@ import "../AdminStyles/AdminCourseDetails.css";
 const AdminCourseDetails = () => {
   const { id } = useParams(); // courseId
   const { token } = useAuth();
+  const { showToast, showConfirm } = useToast();
   const navigate = useNavigate();
 
   const [course, setCourse] = useState(null);
@@ -129,22 +131,24 @@ const AdminCourseDetails = () => {
   }, [currentVideo, token]);
   /* ================= DELETE IMAGE ================= */
   const handleDeleteImage = async () => {
-    if (!window.confirm("Are you sure you want to delete the course image?")) return;
+    const confirmed = await showConfirm("Are you sure you want to delete the course image?", "Delete Confirmation");
+    if (!confirmed) return;
 
     try {
       await BaseUrl.delete(`/admin/deletecourseimage/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Image deleted successfully");
+      showToast("Image deleted successfully", "success");
       setImageUrl(null);
     } catch (err) {
       console.error("Failed to delete image", err);
-      alert("Failed to delete image");
+      showToast("Failed to delete image", "error");
     }
   };
 
   const handleDeleteVideo = async (videoId) => {
-    if (!window.confirm("Are you sure you want to delete this video lesson?")) return;
+    const confirmed = await showConfirm("Are you sure you want to delete this video lesson?", "Delete Video Confirmation");
+    if (!confirmed) return;
     try {
       await BaseUrl.delete(`/admin/deletevideo/${videoId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -155,10 +159,10 @@ const AdminCourseDetails = () => {
       if (currentVideo?.videoId === videoId) {
         setCurrentVideo(updatedVideos[0] || null);
       }
-      alert("Video deleted successfully!");
+      showToast("Video deleted successfully!", "success");
     } catch (error) {
       console.error("Delete video error:", error);
-      alert("Failed to delete video.");
+      showToast("Failed to delete video.", "error");
     }
   };
 

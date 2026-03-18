@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import BaseUrl from "../Components/BaseUrl";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import "../Styles/PostBlog.css"
 
 const PostBlogs = () => {
   const { token } = useAuth();
+  const { showToast } = useToast();
 
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState("");
@@ -17,12 +19,12 @@ const PostBlogs = () => {
     console.log("TOKEN FROM CONTEXT:", token);
 
     if (!token) {
-      alert("You are not authenticated. Please login again.");
+      showToast("Authentication failed. Please login again.", "error");
       return;
     }
 
     if (!image) {
-      alert("Please select an image");
+      showToast("Please select an image", "warning");
       return;
     }
 
@@ -43,7 +45,7 @@ const PostBlogs = () => {
         }
       );
 
-      alert("Blog posted successfully");
+      showToast("Blog posted successfully", "success");
 
       setImage(null);
       setTitle("");
@@ -51,7 +53,7 @@ const PostBlogs = () => {
       setUrl("")
     } catch (err) {
       console.error("Blog post failed:", err.response?.data || err.message);
-      alert("Blog post failed");
+      showToast("Blog post failed", "error");
     }
   };
 

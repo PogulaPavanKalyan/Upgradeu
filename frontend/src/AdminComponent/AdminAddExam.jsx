@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import {
     Plus,
@@ -16,6 +17,7 @@ import "../AdminStyles/AdminAddExam.css";
 
 const AdminAddExam = () => {
     const { token } = useAuth();
+    const { showToast } = useToast();
     const navigate = useNavigate();
     const { courseId } = useParams();
 
@@ -142,7 +144,7 @@ const AdminAddExam = () => {
         e.preventDefault();
 
         if (!selectedVideoId) {
-            alert("Please select a video for the exam.");
+            showToast("Please select a video for the exam.", "warning");
             return;
         }
 
@@ -173,12 +175,12 @@ const AdminAddExam = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            alert("Exam created successfully!");
+            showToast("Exam created successfully!", "success");
             navigate("/Admindashboard");
 
         } catch (err) {
             console.error("Error creating exam:", err);
-            alert(err.message || "Failed to create exam.");
+            showToast(err.message || "Failed to create exam.", "error");
         }
     }
 

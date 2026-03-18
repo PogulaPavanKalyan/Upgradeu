@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import { 
   Trash2, 
@@ -14,6 +15,7 @@ import "../Styles/Crouseldelete.css";
 
 const CarouselList = () => {
   const { token } = useAuth();
+  const { showConfirm } = useToast();
   const [carousels, setCarousels] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +39,8 @@ const CarouselList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this banner?")) return;
+    const confirmed = await showConfirm("Are you sure you want to delete this banner?", "Confirm Deletion");
+    if (!confirmed) return;
     try {
       await BaseUrl.delete(`/admin/deletecrousellist/${id}`, {
         headers: {

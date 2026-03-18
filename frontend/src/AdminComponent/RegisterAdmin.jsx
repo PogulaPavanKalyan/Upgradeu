@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../Components/ToastContext";
 import { User, Mail, Phone, Lock, ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
 import BaseUrl from "../Components/BaseUrl";
 import "../AdminStyles/RegisterAdmin.css";
 
 const RegisterAdmin = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const token = localStorage.getItem("token");
 
     const [name, setName] = useState("");
@@ -39,7 +41,7 @@ const RegisterAdmin = () => {
             });
 
             if (response.data === "sucess") {
-                alert("Admin registration successful!");
+                showToast("Admin registration successful!", "success");
                 navigate("/registeruser");
             } else {
                 setError("Registration failed. Please try again.");

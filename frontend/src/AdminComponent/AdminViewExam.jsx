@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from "../Components/Authprovider";
+import { useToast } from "../Components/ToastContext";
 import BaseUrl from "../Components/BaseUrl";
 import { 
     ChevronLeft, 
@@ -17,6 +18,7 @@ import "../AdminStyles/AdminViewExam.css";
 const AdminViewExam = () => {
     const { videoId } = useParams();
     const { token } = useAuth();
+    const { showToast, showConfirm } = useToast();
     const navigate = useNavigate();
 
     const [exam, setExam] = useState(null);
@@ -83,18 +85,19 @@ const AdminViewExam = () => {
 
     const handleDeleteExam = async () => {
         const examId = exam.id || exam.examId || exam._id;
-        if (!examId) return alert("Exam ID missing.");
-        
-        if (window.confirm("Are you sure? This will permanently delete this assessment.")) {
+        if (!examId) return showToast("Exam ID missing.", "error");
+
+        const confirmed = await showConfirm("Are you sure? This will permanently delete this assessment.", "Confirm Deletion");
+        if (confirmed) {
             try {
                 await BaseUrl.delete(`/admin/exam/${examId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                alert("Exam deleted successfully.");
+                showToast("Exam deleted successfully.", "success");
                 navigate(-1);
             } catch (err) {
                 console.error("Error deleting exam:", err);
-                alert("Failed to delete exam.");
+                showToast("Failed to delete exam.", "error");
             }
         }
     };

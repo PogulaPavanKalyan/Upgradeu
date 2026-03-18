@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import java.net.MalformedURLException;
+import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.http.HttpRange;
 
 import com.UpgradeU.Dto.ExamResponse;
 import com.UpgradeU.Dto.ExamResultResponse;
@@ -68,6 +71,9 @@ import com.UpgradeU.Service.SearchFilterService;
 import com.UpgradeU.Service.VideoService;
 import com.UpgradeU.Service.courseService;
 
+
+import com.UpgradeU.Repo.StudentVideoProgressRepo;
+import com.UpgradeU.Entity.StudentVideoProgress;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -138,6 +144,9 @@ public class MainController {
 	
 	@Autowired
 	private ExamService es;
+
+	@Autowired
+	private StudentVideoProgressRepo progressRepo;
 
 	@PutMapping("/editprofile")
 	public ResponseEntity<Users> editProfile(@RequestBody ProfileUpdatedDto dto) {
@@ -313,7 +322,7 @@ public class MainController {
 	}
 
 	@GetMapping("getvideo/{id}")
-	public ResponseEntity<Resource> getVideo(@PathVariable int id) {
+	public ResponseEntity<ResourceRegion> getVideo(@PathVariable int id, @RequestHeader(value = "Range", required = false) String rangeHeader) {
 		try {
 			Resource video = vs.getvideo(id);
 			VideoEntity v = ve.findById(id).orElseThrow();
@@ -322,9 +331,33 @@ public class MainController {
 				throw new RuntimeException("Video file missing for id: " + id);
 			}
 
-			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.parseMediaType(v.getVideoType() != null ? v.getVideoType() : "video/mp4"))
-					.body(video);
+            long contentLength = video.contentLength();
+            if (rangeHeader != null && !rangeHeader.isEmpty()) {
+                try {
+                    List<HttpRange> ranges = HttpRange.parseRanges(rangeHeader);
+                    if (ranges.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid range header");
+                    }
+                    // For simplicity, we handle only the first range
+                    HttpRange range = ranges.get(0);
+                    long start = range.getRangeStart(contentLength);
+                    long end = range.getRangeEnd(contentLength);
+                    long length = end - start + 1;
+                    
+                    ResourceRegion region = new ResourceRegion(video, start, length);
+                    return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                            .contentType(MediaType.parseMediaType(v.getVideoType() != null ? v.getVideoType() : "video/mp4"))
+                            .body(region);
+                } catch (Exception e) {
+                    // Fallback to full video if range parsing fails
+                }
+            }
+
+            // Return full video if no range or error
+            ResourceRegion region = new ResourceRegion(video, 0, contentLength);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(MediaType.parseMediaType(v.getVideoType() != null ? v.getVideoType() : "video/mp4"))
+                    .body(region);
 		} catch (Exception e) {
 			System.err.println("Video fetch failed for id " + id + ": " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -380,15 +413,50 @@ public class MainController {
         );
     }
 
-     //✅ Submit exam answers
+    // ✅ Submit exam answers
     @PostMapping("/{examId}/submit")
     public ResponseEntity<ExamResultResponse> submitExam(
             @PathVariable("examId") Long examId,
             @RequestBody ExamSubmitRequest request) {
 
         return ResponseEntity.ok(
-                es.submitExam(examId, request.getAnswers())
-        ); 
-   }
+                es.submitExam(
+                        examId,
+                        request.getStudentId().intValue(),
+                        request.getAnswers()
+                )
+        );
+    }
+
+    @PostMapping("/saveProgress")
+    public ResponseEntity<?> saveProgress(@RequestParam int videoId, @RequestParam double lastWatchedTime) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users user = ur.FindByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        StudentVideoProgress progress = progressRepo.findByStudentIdAndVideoId(user.getId(), videoId)
+                .orElse(new StudentVideoProgress(user.getId(), videoId, false, 0.0));
+
+        progress.setLastWatchedTime(lastWatchedTime);
+        progressRepo.save(progress);
+
+        return ResponseEntity.ok("Progress saved");
+    }
+
+    @GetMapping("/getProgress/{videoId}")
+    public ResponseEntity<?> getProgress(@PathVariable int videoId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users user = ur.FindByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        StudentVideoProgress progress = progressRepo.findByStudentIdAndVideoId(user.getId(), videoId)
+                .orElse(new StudentVideoProgress(user.getId(), videoId, false, 0.0));
+
+        return ResponseEntity.ok(progress);
+    }
 	
 }

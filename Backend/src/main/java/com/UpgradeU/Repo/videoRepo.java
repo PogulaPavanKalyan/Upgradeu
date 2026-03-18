@@ -20,5 +20,6 @@ public interface VideoRepo extends JpaRepository<VideoEntity, Integer>{
 	List<VideoEntity> getList(int id);
 
 	List<VideoEntity> findByCourseId(Long courseId);
+	List<VideoEntity> findByCourseIdOrderByIdAsc(Long courseId);
 
 }
