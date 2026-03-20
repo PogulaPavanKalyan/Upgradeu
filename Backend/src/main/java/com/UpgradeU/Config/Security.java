@@ -36,7 +36,7 @@ public class Security {
 
 		http.authorizeHttpRequests(req -> req
 				.requestMatchers("/", "/login/**", "/error", "/getimage/**", "/Course", "/Course/**", "/search/**",
-						"/getcrouselimagelist", "/getcrouselimage/**", "/getbloglist", "/getblogimage/**")
+						"/getcrouselimagelist", "/getcrouselimage/**", "/getbloglist", "/getblogimage/**", "/courseVideoList/**", "/AllCourse")
 				.permitAll()
 				.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 				.anyRequest()

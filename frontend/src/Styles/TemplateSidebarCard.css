@@ -400,3 +400,26 @@
   .tsc-learn-grid { grid-template-columns: 1fr; }
   .tsc-method-grid { grid-template-columns: 1fr; }
 }
+
+/* ─── SYLLABUS ACCORDION (Light Mode) ───────────────────────── */
+.tcg-syllabus-accordion { display: flex; flex-direction: column; gap: 12px; }
+.tcg-acc-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+.tcg-acc-item.open { background: #fff; border-color: var(--primary-color, #4f8df7); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.tcg-acc-header { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+.tcg-acc-header h4 { margin: 0; font-size: 16px; font-weight: 700; color: #1e293b; }
+.tcg-acc-icon { font-size: 20px; font-weight: 700; color: #94a3b8; }
+.tcg-acc-item.open .tcg-acc-icon { color: var(--primary-color, #4f8df7); }
+.tcg-acc-body { border-top: 1px solid #e2e8f0; background: #fff; padding: 10px; }
+.tcg-acc-body .curriculum-item { border: none !important; background: transparent !important; margin-bottom: 4px; padding: 12px 16px; border-bottom: 1px solid #f1f5f9 !important; border-radius: 0; }
+.tcg-acc-body .curriculum-item:last-child { border-bottom: none !important; margin-bottom: 0; }
+.tcg-acc-body .curriculum-item:hover { background: #f8fafc !important; }
+.curriculum-item { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; background:#fff;}
+.curriculum-item.locked { opacity: 0.6; }
+.curriculum-item:hover { border-color: var(--primary-color, #4f8df7); }
+.curr-icon { font-size: 18px; color: #64748b; }
+.curr-info { flex: 1; }
+.curr-title { display: block; font-weight: 700; color: #1e293b; font-size: 15px; }
+.curr-desc-preview { display: block; font-size: 13px; color: #64748b; margin-top: 4px; }
+.curr-action { font-size: 13px; font-weight: 700; color: #64748b; }
+.curriculum-item.unlocked .curr-action { color: #22c55e; }
+.curriculum-item.unlocked .curr-icon { color: var(--primary-color, #4f8df7); }

@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class VideoEntity {
 	
@@ -28,11 +30,14 @@ public class VideoEntity {
 	private Integer serialNumber;
 	private String description;
 	private String title;
+	
 	@ManyToOne
+	@JsonIgnore
 	private Course course;
 	
 	@ManyToOne
 	@JoinColumn(name = "section_id")
+	@JsonIgnore
 	private Sections section;
 
 	public VideoEntity(int id, String videoPath, String videoType, Integer serialNumber, String description,

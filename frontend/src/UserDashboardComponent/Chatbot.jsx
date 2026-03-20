@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Styles/Chatbot.css";
 import { getBotReply } from "../Chat/chatService";
+import BaseUrl from "../Components/BaseUrl";
 
 const QUICK_ACTIONS = [
   { label: "📘 Course Details", value: "course" },
@@ -9,24 +10,32 @@ const QUICK_ACTIONS = [
   { label: "🧑‍🏫 Mentor Support", value: "mentor" }
 ];
 
-const Chatbot = ({ onClose }) => {
+const Chatbot = ({ onClose, userName = "" }) => {
+  const firstName = userName ? userName.split(" ")[0] : "";
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Welcome to UpgradeU Support 👋\nHow can I help you excel today?"
+      text: firstName ? `Welcome to UpgradeU Support 👋\nHi ${firstName}, how can I help you excel today?` : "Welcome to UpgradeU Support 👋\nHow can I help you excel today?"
     }
   ]);
 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    BaseUrl.get("/allcourses")
+      .then(res => setCourses(res.data || []))
+      .catch(err => console.error("Error fetching courses for chatbot:", err));
+  }, []);
 
   const handleQuickAction = (value) => {
     setMessages((prev) => [...prev, { sender: "user", text: value }]);
 
     setIsTyping(true);
     setTimeout(() => {
-      const reply = getBotReply(value);
+      const reply = getBotReply(value, firstName, courses);
       setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
       setIsTyping(false);
     }, 800);
@@ -41,7 +50,7 @@ const Chatbot = ({ onClose }) => {
 
     setIsTyping(true);
     setTimeout(() => {
-      const reply = getBotReply(userMessage.toLowerCase());
+      const reply = getBotReply(userMessage.toLowerCase(), firstName, courses);
       if (reply) {
         setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
       } else {
@@ -49,7 +58,7 @@ const Chatbot = ({ onClose }) => {
           ...prev,
           {
             sender: "bot",
-            text: "I'm still learning! Would you like to connect with a human expert?"
+            text: "That's a great question! Please wait, our support team will connect with you shortly to assist you further."
           }
         ]);
         setShowSupport(true);
@@ -116,6 +125,12 @@ const Chatbot = ({ onClose }) => {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
           placeholder="Type your message..."
         />
         <button type="button" onClick={handleSend}>

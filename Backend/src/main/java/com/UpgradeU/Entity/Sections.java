@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Sections {
 
@@ -27,6 +29,7 @@ public class Sections {
 	
 	@ManyToOne
 	@JoinColumn(name = "course_id") 
+	@JsonIgnore
 	private Course course;
 	
 	

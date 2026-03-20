@@ -106,10 +106,24 @@ const SingleCourseDetails = () => {
   }
 
   if (matchedKey === "default") {
-    if (titleLower.includes("java") || titleLower.includes("python") || catLower.includes("dev")) {
-      matchedKey = "Software Development";
-    } else if (titleLower.includes("test") || titleLower.includes("qa")) {
-      matchedKey = "Full Stack Testing";
+    if (titleLower.includes("react")) {
+      matchedKey = "React";
+    } else if (titleLower.includes("angular")) {
+      matchedKey = "Angular";
+    } else if (titleLower.includes("java") || titleLower.includes("springboot")) {
+      matchedKey = "Full Stack Java";
+    } else if (titleLower.includes("python") || titleLower.includes("django") || titleLower.includes("flask")) {
+      matchedKey = "Full Stack Python";
+    } else if (titleLower.includes("data science") || titleLower.includes("machine learning") || titleLower.includes("ai")) {
+      matchedKey = "Data Science";
+    } else if (titleLower.includes("marketing") || titleLower.includes("seo") || titleLower.includes("ads")) {
+      matchedKey = "Digital Marketing";
+    } else if (titleLower.includes("data analysis") || titleLower.includes("powerbi") || titleLower.includes("tableau") || titleLower.includes("excel")) {
+      matchedKey = "Data Analysis";
+    } else if (titleLower.includes("devops") || titleLower.includes("aws") || titleLower.includes("cloud") || titleLower.includes("azure") || titleLower.includes("kubernetes")) {
+      matchedKey = "DevOps";
+    } else if (titleLower.includes("test") || titleLower.includes("qa") || titleLower.includes("selenium")) {
+      matchedKey = "Testing";
     }
   }
 

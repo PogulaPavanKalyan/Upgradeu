@@ -47,9 +47,6 @@ const UserDashboard = () => {
 
 
   const [showChat, setShowChat] = useState(false);
-
-  { showChat && <Chatbot onClose={() => setShowChat(false)} /> }
-
   const [step, setStep] = useState(0);
 
   // Footer Dropdown State
@@ -183,14 +180,21 @@ const UserDashboard = () => {
         className="help-fab"
         aria-label="Help"
         type="button"
-        onClick={() => setShowChat(!showChat)}
+        onClick={() => {
+          if (!token) {
+            alert("Please login to use the support chat.");
+            navigate("/login");
+          } else {
+            setShowChat(!showChat);
+          }
+        }}
       >
         💬
       </button>
 
       {showChat && (
         <div className="box">
-          <Chatbot onClose={() => setShowChat(false)} />
+          <Chatbot onClose={() => setShowChat(false)} userName={userName} />
         </div>
       )}
 
