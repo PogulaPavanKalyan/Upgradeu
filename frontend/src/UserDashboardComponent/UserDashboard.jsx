@@ -17,7 +17,8 @@ import { useNavigate } from "react-router-dom";
 
 import WhyChooseUpgradeU from "./WhyChooseUpgradeU";
 import CourseListings from "./CourseListings";
-import NavBar from "../UserDashboardComponent/NavBar";
+
+
 import Faq from "../Components/Faq";
 import CarouselImages from "./CrouselImages";
 import SuccessStories from "../Components/SuccessStories";
@@ -26,28 +27,106 @@ import Certificates from "../Components/Certificates";
 import { useAuth } from "../Components/Authprovider";
 import BaseUrl from "../Components/BaseUrl";
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  if (hour < 21) return "Good Evening";
-  return "Good Night";
+// ─── Stats Bar ────────────────────────────────────────────────
+const stats = [
+  { icon: "👨‍🎓", end: 1, suffix: "M+", label: "Active Learners" },
+  { icon: "✅",  end: 95, suffix: "%",  label: "Success Rate" },
+  { icon: "⭐",  end: 4.8, suffix: "/5", label: "Google Rating", decimal: true },
+  { icon: "💻",  end: 100, suffix: "% Live", label: "Training" },
+];
+
+const StatsBar = () => {
+  const [counts, setCounts] = useState(stats.map(() => 0));
+  const ref = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        stats.forEach((s, i) => {
+          const duration = 1800;
+          const steps = 60;
+          const increment = s.end / steps;
+          let current = 0;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= s.end) { current = s.end; clearInterval(timer); }
+            setCounts(prev => {
+              const next = [...prev];
+              next[i] = s.decimal ? parseFloat(current.toFixed(1)) : Math.floor(current);
+              return next;
+            });
+          }, duration / steps);
+        });
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div className="stats-bar" ref={ref}>
+      {stats.map((s, i) => (
+        <div className="stat-item" key={i}>
+          <span className="stat-icon">{s.icon}</span>
+          <div className="stat-content">
+            <span className="stat-number">{counts[i]}{s.suffix}</span>
+            <span className="stat-label">{s.label}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
+// ─── Hiring Partners ──────────────────────────────────────────
+const hiringPartners = [
+  { name: "TCS",           domain: "tcs.com" },
+  { name: "Infosys",       domain: "infosys.com" },
+  { name: "Wipro",         domain: "wipro.com" },
+  { name: "HCL",           domain: "hcltech.com" },
+  { name: "Cognizant",     domain: "cognizant.com" },
+  { name: "Accenture",     domain: "accenture.com" },
+  { name: "IBM",           domain: "ibm.com" },
+  { name: "Capgemini",     domain: "capgemini.com" },
+  { name: "Tech Mahindra", domain: "techmahindra.com" },
+  { name: "Deloitte",      domain: "deloitte.com" },
+  { name: "Mphasis",       domain: "mphasis.com" },
+  { name: "Mindtree",      domain: "mindtree.com" },
+];
 
+const HiringPartners = () => (
+  <section className="hiring-section">
+    <div className="hiring-header">
+      <h2 className="hiring-title">Our Students Work At</h2>
+      <p className="hiring-sub">Top companies hire UpgradeU graduates</p>
+    </div>
+    <div className="marquee-track-wrapper">
+      <div className="marquee-track">
+        {[...hiringPartners, ...hiringPartners].map((p, i) => (
+          <div className="partner-chip" key={i}>
+            <img
+              src={`https://logo.clearbit.com/${p.domain}`}
+              alt={p.name}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+            <span>{p.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [courses, setCourses] = useState([]);
   const [userName, setUserName] = useState("");
   const [showNotification, setShowNotification] = useState(false);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-
-
   const [showChat, setShowChat] = useState(false);
-  const [step, setStep] = useState(0);
 
   // Footer Dropdown State
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -111,6 +190,7 @@ const UserDashboard = () => {
       <div className="body">
 
         <CarouselImages userName={userName} />
+        <StatsBar />
 
         {enrolledCourses.length > 0 && (
           <div className="continue-watching-container">
@@ -159,6 +239,7 @@ const UserDashboard = () => {
       <CourseListings />
       <WhyChooseUpgradeU />
       <SuccessStories />
+      <HiringPartners />
       <Reviews />
       <Certificates />
 
@@ -339,6 +420,7 @@ const UserDashboard = () => {
           </div>
         </div>
       </section>
+
 
 
 

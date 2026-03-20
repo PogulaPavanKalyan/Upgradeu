@@ -17,6 +17,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import "../Styles/WhyChooseUpgradeU.css";
+import { useNavigate } from "react-router-dom";
 
 /* ===========================
    KPI BLOCK (Counter + Bar)
@@ -29,6 +30,9 @@ function KPI({ label, value, max = 100, suffix, icon: Icon }) {
   const percent = useTransform(motionValue, v => `${(v / max) * 100}%`);
   const rounded = useTransform(motionValue, v => Math.floor(v));
 
+ 
+
+
   useEffect(() => {
     if (inView) {
       animate(motionValue, value, {
@@ -37,6 +41,8 @@ function KPI({ label, value, max = 100, suffix, icon: Icon }) {
       });
     }
   }, [inView, value, motionValue]);
+
+  
 
   return (
     <div className="kpi-card" ref={ref}>
@@ -66,7 +72,8 @@ function KPI({ label, value, max = 100, suffix, icon: Icon }) {
 =========================== */
 export default function WhyChooseUpgradeU() {
   const scrollRef = useRef(null);
-
+  
+   const navigate = useNavigate();
   // Auto-scroll logic for mobile
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -112,7 +119,7 @@ export default function WhyChooseUpgradeU() {
             className="badge"
           >
             <Zap size={14} className="zap-icon" />
-            <span>Why UpgradeU?</span>
+            <span style={{color:"black"}}>Why UpgradeU?</span>
           </motion.div>
 
           <motion.h2
@@ -213,7 +220,7 @@ export default function WhyChooseUpgradeU() {
               <div className="cta-box">
                 <h4>Ready to start?</h4>
                 <p>Join our community today and get access to free premium resources.</p>
-                <button className="cta-button">Explore Courses</button>
+                <button onClick={() => navigate('/Courses')} className="cta-button">Explore Courses</button>
               </div>
             </div>
           </div>

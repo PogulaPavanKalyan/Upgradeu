@@ -48,6 +48,20 @@ const data = [
 const LearnerSuccess = () => {
   const scrollRef = useRef(null);
 
+  const scrollLeft = () => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+    const cardWidth = scrollContainer.firstChild ? scrollContainer.firstChild.offsetWidth + 16 : 300;
+    scrollContainer.scrollBy({ left: -cardWidth, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+    const cardWidth = scrollContainer.firstChild ? scrollContainer.firstChild.offsetWidth + 16 : 300;
+    scrollContainer.scrollBy({ left: cardWidth, behavior: "smooth" });
+  };
+
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
@@ -79,7 +93,7 @@ const LearnerSuccess = () => {
         WILL YOU BE NEXT?</h2>
 
       <div className="ls-wrapper">
-        <button className="nav-btn left">‹</button>
+        <button className="nav-btn left" onClick={scrollLeft}>‹</button>
 
         <div className="ls-cards" ref={scrollRef}>
           {data.map((item, i) => (
@@ -116,7 +130,7 @@ const LearnerSuccess = () => {
           ))}
         </div>
 
-        <button className="nav-btn right">›</button>
+        <button className="nav-btn right" onClick={scrollRight}>›</button>
       </div>
     </section>
   );

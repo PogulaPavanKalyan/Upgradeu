@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Components/Authprovider";
 import BaseUrl from "../Components/BaseUrl";
 import fallbackImg from "../assets/images/img2.png";
-import { Star, TrendingUp, Award, ChevronRight } from "lucide-react";
+import { Award, ChevronRight } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/CourseListing.css";
 
@@ -153,7 +153,9 @@ const CourseListings = () => {
         // Fetch Enrolled Courses if logged in
         if (token) {
           try {
-            const enrolledRes = await BaseUrl.get("mypaymentuser");
+            const enrolledRes = await BaseUrl.get("mypaymentuser", {
+              headers: { Authorization: `Bearer ${token}` }
+            });
             const enrolledIds = new Set(enrolledRes.data.map(item => item.course.id));
             
             // Mark courses as enrolled
@@ -175,23 +177,11 @@ const CourseListings = () => {
     fetchData();
   }, [token]);
 
-  // Filter courses by category/criteria
   const featuredCourses = courses.slice(0, 4);
-  const topRatedCourses = courses
-    .filter((c) => c.rating >= 4.5 || c.category?.toLowerCase().includes("popular"))
-    .slice(0, 4);
-  const inDemandCourses = courses
-    .filter(
-      (c) =>
-        c.category?.toLowerCase().includes("demand") ||
-        c.category?.toLowerCase().includes("trending") ||
-        c.title?.toLowerCase().includes("popular")
-    )
-    .slice(0, 4);
 
   return (
     <div className="course-section">
-      {/* Featured Courses - Stack Layout on Mobile */}
+      {/* Featured Courses */}
       <CourseSection
         title="Featured Courses"
         icon={<Award className="section-icon" size={28} />}
@@ -201,29 +191,7 @@ const CourseListings = () => {
         navigate={navigate}
       />
 
-      {/* Top Rated Courses - Carousel on Mobile */}
-      <CourseSection
-        title="Top Rated Courses"
-        icon={<Star className="section-icon" size={28} />}
-        courses={topRatedCourses}
-        badgeType="top-rated"
-        layout="carousel"
-        enableAutoScroll={true}
-        navigate={navigate}
-      />
-
-      {/* In-Demand / Trending Courses - Carousel on Mobile */}
-      <CourseSection
-        title="Most In-Demand Courses"
-        icon={<TrendingUp className="section-icon" size={28} />}
-        courses={inDemandCourses}
-        badgeType="trending"
-        layout="carousel"
-        enableAutoScroll={true}
-        navigate={navigate}
-      />
-
-      {/* All Courses Section - Carousel (Single Card View) */}
+      {/* All Available Courses */}
       {courses.length > 0 && (
         <CourseSection
           title="All Available Courses"
